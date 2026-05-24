@@ -1,53 +1,123 @@
 import type { Context } from "hono";
 
-import { routerAgent } from "../agents/router.agent.js";
+import { routerAgent }
+from "../agents/router.agent.js";
 
 import {
   saveMessage,
   getConversationMessages,
 } from "../services/conversation.service.js";
 
-export const sendMessage = async (c: Context) => {
-  try {
-    const body = await c.req.json();
+export const sendMessage =
+  async (c: Context) => {
 
-    const {
-      message,
-      conversationId,
-    } = body;
+    try {
 
-    // Save user message
-    await saveMessage(
-      conversationId,
-      "user",
-      message
-    );
+      const body =
+        await c.req.json();
 
-    // Fetch previous conversation history
-    const previousMessages =
-      await getConversationMessages(
-        conversationId
+      const {
+        message,
+        conversationId,
+      } = body;
+
+      // Save user message
+      await saveMessage(
+        conversationId,
+        "user",
+        message
       );
 
-    // Get streaming response from router agent
-    const response = await routerAgent(
-      message,
-      previousMessages,
-      conversationId,
-    );
+      // Previous messages
+      const previousMessages =
+        await getConversationMessages(
+          conversationId
+        );
 
-    // Return stream directly
-    return response;
+      // Get stream from agent
+      const stream =
+        await routerAgent(
+          message,
+          previousMessages,
+          conversationId
+        );
 
-  } catch (error) {
-    console.error(error);
+      let fullResponse = "";
 
-    return c.json(
-      {
-        success: false,
-        message: "Something went wrong",
-      },
-      500
-    );
-  }
+      // Create streaming response
+      return new Response(
+
+        new ReadableStream({
+
+          async start(controller) {
+
+            const reader =
+              stream.body?.getReader();
+
+            const decoder =
+              new TextDecoder();
+
+            if (!reader) {
+
+              controller.close();
+
+              return;
+            }
+
+            while (true) {
+
+              const {
+                done,
+                value,
+              } =
+                await reader.read();
+
+              if (done) break;
+
+              const chunk =
+                decoder.decode(
+                  value
+                );
+
+              // Save full response
+              fullResponse += chunk;
+
+              // Send chunk to frontend
+              controller.enqueue(
+                value
+              );
+            }
+
+            // Save assistant message
+            await saveMessage(
+              conversationId,
+              "assistant",
+              fullResponse
+            );
+
+            controller.close();
+          },
+        }),
+
+        {
+          headers: {
+            "Content-Type":
+              "text/plain",
+          },
+        }
+      );
+
+    } catch (error) {
+
+      console.error(error);
+
+      return c.json(
+        {
+          success: false,
+          message:
+            "Something went wrong",
+        },
+        500
+      );
+    }
 };

@@ -19,10 +19,16 @@ model User {
 
 model Conversation {
   id        String    @id @default(uuid())
+
+  title     String    @default("New Conversation")
+
   userId    String
-  user      User      @relation(fields: [userId], references: [id])
+
+  user      User @relation(fields: [userId], references: [id])
+
   messages  Message[]
-  createdAt DateTime  @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model Message {
