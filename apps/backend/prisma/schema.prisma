@@ -12,6 +12,8 @@ model User {
   email         String         @unique
   name          String?
   conversations Conversation[]
+  orders   Order[]
+  payments Payment[]
   createdAt     DateTime       @default(now())
 }
 
@@ -33,22 +35,39 @@ model Message {
 }
 
 model Order {
-  id        String   @id @default(uuid())
-  userId    String
-  status    String
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+
+  productName  String
+  trackingId   String?
+  status       String
+
+  createdAt    DateTime @default(now())
 }
 
 model Payment {
-  id        String   @id @default(uuid())
-  userId    String
-  status    String
-  createdAt DateTime @default(now())
+  id          String    @id @default(uuid())
+
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+
+  amount      Float
+  status      String
+
+  invoices    Invoice[]
+
+  createdAt   DateTime @default(now())
 }
 
 model Invoice {
-  id        String   @id @default(uuid())
-  paymentId String
-  amount    Float
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+
+  paymentId   String
+  payment     Payment  @relation(fields: [paymentId], references: [id])
+
+  amount      Float
+
+  createdAt   DateTime @default(now())
 }

@@ -7,8 +7,11 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^3.0.39",
+    "@ai-sdk/xai": "^3.0.92",
     "@hono/node-server": "^1.19.9",
     "@prisma/client": "5",
+    "ai": "^6.0.191",
     "hono": "^4.11.9",
     "prisma": "5"
   },

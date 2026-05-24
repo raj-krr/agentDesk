@@ -1,6 +1,9 @@
 import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
-
+import userRouter from "./routes/user.route.js";
+import orderRouter from "./routes/order.route.js";
+import chatRouter from './routes/chat.route.js';
+import conversationRouter from './routes/conversation.route.js';
 const app = new Hono()
 
 app.get('/', (c) => c.text('Backend is alive'))
@@ -11,6 +14,10 @@ app.get('/api/health', (c) =>
     service: 'agentDesk-backend',
   })
 )
+app.route("/users", userRouter);
+app.route("/orders", orderRouter);
+app.route("/chat", chatRouter); 
+app.route("/conversations", conversationRouter);
 
 serve({
   fetch: app.fetch,

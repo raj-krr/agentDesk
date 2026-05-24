@@ -1,135 +1,301 @@
-# Turborepo starter
+# AgentDesk 🚀  
+### AI-Powered Multi-Agent Customer Support System
 
-This Turborepo starter is maintained by the Turborepo core team.
+AgentDesk is a modern AI-powered customer support backend built using a **multi-agent architecture**.  
+It intelligently routes user queries to specialized AI agents such as:
 
-## Using this example
+- 📦 Order Support Agent
+- 💳 Billing Support Agent
+- 🛠️ General Support Agent
 
-Run the following command:
+The system uses:
+- ⚡ Hono for backend APIs
+- 🧠 AI SDK + Groq LLM for intelligent routing
+- 🗄️ Prisma ORM + Supabase PostgreSQL
+- 💬 Conversation memory system
+- 🧩 Tool-based AI architecture
 
-```sh
-npx create-turbo@latest
+---
+
+# ✨ Features
+
+## 🤖 AI Multi-Agent Routing
+
+The system intelligently classifies user intent and routes requests to the correct agent.
+
+### Example:
+- “Where is my package?” → Order Agent
+- “Refund not received” → Billing Agent
+- “I can't login” → Support Agent
+
+---
+
+## 📦 Order Tracking Agent
+
+Fetches real order data from the database and responds naturally using AI.
+
+### Example Response
+
+```text
+Your iPhone 15 order has been shipped successfully.
+
+Tracking ID: TRK12345
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🧠 Conversation Memory
 
-### Apps and Packages
+Stores:
+- conversations
+- messages
+- chat history
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+This allows contextual AI conversations.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Example
 
-### Utilities
+```text
+User: Track my order
+AI: Your package has shipped
 
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+User: When will it arrive?
+AI: It should arrive soon
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## 🛠️ Tool-Based Architecture
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Agents do not directly access the database.
 
-### Develop
+### Architecture
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
+```text
+Agent → Tool → Service → Prisma → Database
 ```
 
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+This creates:
+- scalable architecture
+- clean separation
+- reusable logic
 
+---
+
+## ⚡ Streaming-Ready AI Responses
+
+Built with Vercel AI SDK streaming support for ChatGPT-like experiences.
+
+---
+
+# 🏗️ Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| Hono | Backend framework |
+| TypeScript | Type safety |
+| Prisma | ORM |
+| Supabase | PostgreSQL database |
+| Groq | LLM provider |
+| Vercel AI SDK | AI orchestration |
+| TurboRepo | Monorepo management |
+| pnpm | Fast package manager |
+
+---
+
+# 🧱 Project Architecture
+
+```text
+Frontend
+   ↓
+Hono Backend
+   ↓
+Controllers
+   ↓
+Router Agent (LLM)
+   ↓
+Sub Agents
+   ├── Order Agent
+   ├── Billing Agent
+   └── Support Agent
+          ↓
+Tools
+          ↓
+Services
+          ↓
+Prisma ORM
+          ↓
+Supabase PostgreSQL
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
 
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+---
+
+# 📂 Folder Structure
+
+```text
+apps/
+ ├── backend/
+ │    ├── src/
+ │    │    ├── agents/
+ │    │    ├── controllers/
+ │    │    ├── routes/
+ │    │    ├── services/
+ │    │    ├── tools/
+ │    │    ├── db/
+ │    │    ├── lib/
+ │    │    └── index.ts
+ │    │
+ │    ├── prisma/
+ │    └── package.json
+ │
+ └── web/ (frontend - upcoming)
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+# 🧠 AI Flow
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```text
+User Message
+     ↓
+Router Agent
+     ↓
+Intent Classification
+     ↓
+Sub-Agent Selection
+     ↓
+Tool Execution
+     ↓
+Database Query
+     ↓
+AI Response
 ```
 
-## Useful Links
+---
 
-Learn more about the power of Turborepo:
+# ⚙️ API Endpoints
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+## Health Check
+
+```http
+GET /api/health
+```
+
+---
+
+## Get Users
+
+```http
+GET /users
+```
+
+---
+
+## Get Orders
+
+```http
+GET /orders
+```
+
+---
+
+## Create Conversation
+
+```http
+POST /conversations
+```
+
+### Request Body
+
+```json
+{
+  "userId": "your-user-id"
+}
+```
+
+---
+
+## Send Chat Message
+
+```http
+POST /chat/messages
+```
+
+### Request Body
+
+```json
+{
+  "message": "Track my order",
+  "conversationId": "your-conversation-id"
+}
+```
+
+---
+
+# 🚀 Getting Started
+
+## 1. Clone Repository
+
+```bash
+git clone <repo-url>
+```
+
+---
+
+## 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+---
+
+## 3. Setup Environment Variables
+
+Create `.env`
+
+```env
+DATABASE_URL=your_supabase_url
+GROQ_API_KEY=your_groq_api_key
+```
+
+---
+
+## 4. Push Prisma Schema
+
+```bash
+pnpm prisma db push
+```
+
+---
+
+## 5. Run Development Server
+
+```bash
+pnpm dev
+```
+
+---
+
+# 📌 Future Improvements
+
+- ✅ Frontend chat UI
+- ✅ Real-time streaming UI
+- ✅ Authentication
+- ✅ Dynamic tool calling
+- ✅ RAG integration
+- ✅ Agent analytics
+- ✅ Vector database memory
+- ✅ Admin dashboard
+
+---
+
+# 👨‍💻 Author
+
+Built with ❤️ by Raj Kumar
+
+---
+
+# 📜 License
+
+MIT License
