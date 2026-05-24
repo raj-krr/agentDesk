@@ -9,19 +9,69 @@ export const routerAgent = async (message: string,previousMessages: any[],  conv
   const result = await generateText({
     model: groq("llama-3.1-8b-instant"),
 
-    prompt: `
-You are an AI intent classifier.
+prompt: `
+You are an AI router for a customer support platform.
 
-Classify the user query into ONLY ONE:
+Your task is to classify the user's intent into ONLY ONE category.
 
-- ORDER
-- BILLING
-- SUPPORT
+Categories:
 
-User message:
+ORDER:
+- tracking package
+- shipping updates
+- delivery delays
+- order status
+- cancellations
+- product ordered
+- package arrival
+
+BILLING:
+- refunds
+- invoices
+- payments
+- subscriptions
+- charges
+- pricing
+- billing issues
+
+SUPPORT:
+- login problems
+- technical issues
+- password reset
+- FAQs
+- account help
+- general support
+
+Examples:
+
+User: "Where is my package?"
+Answer: ORDER
+
+User: "Why is delivery delayed?"
+Answer: ORDER
+
+User: "I need a refund"
+Answer: BILLING
+
+User: "Payment failed"
+Answer: BILLING
+
+User: "I forgot my password"
+Answer: SUPPORT
+
+User: "App is not working"
+Answer: SUPPORT
+
+Conversation History:
+${JSON.stringify(previousMessages)}
+
+Current User Message:
 "${message}"
 
-Return ONLY the category name.
+Rules:
+- Return ONLY one category
+- No explanation
+- No extra text
 `,
   });
 
@@ -31,9 +81,9 @@ Return ONLY the category name.
     return orderAgent(message);
   }
 
-  if (intent === "BILLING") {
-    return billingAgent();
-  }
+if (intent === "BILLING") {
+  return billingAgent(message);
+}
 
-  return supportAgent();
+return supportAgent(message);
 };

@@ -4,8 +4,13 @@ import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";
 import chatRouter from './routes/chat.route.js';
 import conversationRouter from './routes/conversation.route.js';
+import { cors } from 'hono/cors';
 const app = new Hono()
 
+
+app.use("*", cors({
+  origin: "*",
+}));
 app.get('/', (c) => c.text('Backend is alive'))
 
 app.get('/api/health', (c) =>
