@@ -1,51 +1,30 @@
+import type { Context } from "hono";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import { prisma } from "../db/prisma.js";
+import {
+  getAllUsers,
+  getUserByEmail,
+  createUser,
+} from "../services/user.service.js";
 
-export const getAllUsers = async (c: any) => {
-  try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+export const getUsers = async (c: Context) => {
+  const users = await getAllUsers();
 
-    return c.json({
-      success: true,
-      count: users.length,
-      users,
-    });
-  } catch (error) {
-    console.error(error);
-
-    return c.json(
-      {
-        success: false,
-        message: "Failed to fetch users",
-      },
-      500
-    );
-  }
+  return c.json({
+    success: true,
+    users,
+  });
 };
 
-export const register = async (c: any) => {
+export const register = async (c: Context) => {
   try {
     const body = await c.req.json();
 
     const { name, email, password } = body;
 
-    const existingUser = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const existingUser =
+      await getUserByEmail(email);
 
     if (existingUser) {
       return c.json(
@@ -57,34 +36,20 @@ export const register = async (c: any) => {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      10
+    const user = await createUser(
+      name,
+      email,
+      password
     );
-
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-      },
-    });
 
     return c.json(
       {
         success: true,
-        message: "User registered successfully",
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        },
+        user,
       },
       201
     );
   } catch (error) {
-    console.error(error);
-
     return c.json(
       {
         success: false,
@@ -95,17 +60,14 @@ export const register = async (c: any) => {
   }
 };
 
-export const login = async (c: any) => {
+export const login = async (c: Context) => {
   try {
     const body = await c.req.json();
 
     const { email, password } = body;
 
-    const user = await prisma.user.findUnique({
-      where: {
-        email,
-      },
-    });
+    const user =
+      await getUserByEmail(email);
 
     if (!user) {
       return c.json(
@@ -117,10 +79,11 @@ export const login = async (c: any) => {
       );
     }
 
-    const validPassword = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const validPassword =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
 
     if (!validPassword) {
       return c.json(
@@ -153,8 +116,6 @@ export const login = async (c: any) => {
       },
     });
   } catch (error) {
-    console.error(error);
-
     return c.json(
       {
         success: false,
@@ -165,7 +126,7 @@ export const login = async (c: any) => {
   }
 };
 
-export const logout = async (c: any) => {
+export const logout = async (c: Context) => {
   return c.json({
     success: true,
     message: "Logged out successfully",

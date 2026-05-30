@@ -1,5 +1,15 @@
 import { prisma } from "../db/prisma.js";
 
+export const getConversationById = async (
+  conversationId: string
+) => {
+  return prisma.conversation.findUnique({
+    where: {
+      id: conversationId,
+    },
+  });
+};
+
 export const createConversation = async (userId: string) => {
   return prisma.conversation.create({
     data: {

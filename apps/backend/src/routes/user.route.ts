@@ -1,15 +1,15 @@
 import { Hono } from "hono";
 
 import {
+  getUsers,
   register,
   login,
   logout,
-  getAllUsers,
 } from "../controllers/user.controller.js";
 
 const userRouter = new Hono();
 
-userRouter.get("/", getAllUsers);
+userRouter.get("/", getUsers);
 
 userRouter.post(
   "/register",

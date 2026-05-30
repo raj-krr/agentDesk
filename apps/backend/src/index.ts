@@ -19,10 +19,10 @@ app.get('/api/health', (c) =>
     service: 'agentDesk-backend',
   })
 )
-app.route("/users", userRouter);
-app.route("/orders", orderRouter);
-app.route("/chat", chatRouter); 
-app.route("/conversations", conversationRouter);
+app.route("/api/users", userRouter);
+app.route("/api/orders", orderRouter);
+app.route("/api/chat", chatRouter); 
+app.route("/api/conversations", conversationRouter);
 
 serve({
   fetch: app.fetch,

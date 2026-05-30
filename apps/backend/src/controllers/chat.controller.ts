@@ -6,6 +6,7 @@ from "../agents/router.agent.js";
 import {
   saveMessage,
   getConversationMessages,
+  getConversationById,
 } from "../services/conversation.service.js";
 
 export const sendMessage =
@@ -34,12 +35,31 @@ export const sendMessage =
           conversationId
         );
 
+      // Get conversation
+      const conversation =
+        await getConversationById(
+          conversationId
+        );
+
+      if (!conversation) {
+
+        return c.json(
+          {
+            success: false,
+            message:
+              "Conversation not found",
+          },
+          404
+        );
+      }
+
       // Get stream from agent
       const stream =
         await routerAgent(
           message,
           previousMessages,
-          conversationId
+          conversationId,
+          conversation.userId
         );
 
       let fullResponse = "";

@@ -5,7 +5,7 @@ import { orderAgent } from "./order.agent.js";
 import { billingAgent } from "./billing.agent.js";
 import { supportAgent } from "./support.agent.js";
 
-export const routerAgent = async (message: string,previousMessages: any[],  conversationId: string) : Promise<Response>=> {
+export const routerAgent = async (message: string,previousMessages: any[],  conversationId: string, userId: string) : Promise<Response>=> {
   const result = await generateText({
     model: groq("llama-3.1-8b-instant"),
 
@@ -85,5 +85,5 @@ if (intent === "BILLING") {
   return billingAgent(message);
 }
 
-return supportAgent(message);
+return supportAgent(message,userId);
 };
