@@ -14,13 +14,13 @@ export const createNewConversation =
 
     try {
 
-      const body =
-        await c.req.json();
-
-      const { userId } = body;
+      const user =
+        c.get("user");
 
       const conversation =
-        await createConversation(userId);
+        await createConversation(
+          user.userId
+        );
 
       return c.json({
         success: true,
@@ -28,6 +28,8 @@ export const createNewConversation =
       });
 
     } catch (error) {
+
+      console.error(error);
 
       return c.json(
         {
@@ -50,10 +52,16 @@ export const getConversationById =
       const id =
         c.req.param("id");
 
+      const user =
+        c.get("user");
+
       const conversation =
-        await prisma.conversation.findUnique({
+        await prisma.conversation.findFirst({
+
           where: {
             id,
+            userId:
+              user.userId,
           },
 
           include: {
@@ -65,12 +73,26 @@ export const getConversationById =
           },
         });
 
+      if (!conversation) {
+
+        return c.json(
+          {
+            success: false,
+            message:
+              "Conversation not found",
+          },
+          404
+        );
+      }
+
       return c.json({
         success: true,
         conversation,
       });
 
     } catch (error) {
+
+      console.error(error);
 
       return c.json(
         {
@@ -90,8 +112,17 @@ export const getAllConversations =
 
     try {
 
+      const user =
+        c.get("user");
+
       const conversations =
         await prisma.conversation.findMany({
+
+          where: {
+            userId:
+              user.userId,
+          },
+
           orderBy: {
             createdAt: "desc",
           },
@@ -103,6 +134,8 @@ export const getAllConversations =
       });
 
     } catch (error) {
+
+      console.error(error);
 
       return c.json(
         {
@@ -130,8 +163,34 @@ export const updateConversationTitle =
 
       const { title } = body;
 
+      const user =
+        c.get("user");
+
+      const existingConversation =
+        await prisma.conversation.findFirst({
+
+          where: {
+            id,
+            userId:
+              user.userId,
+          },
+        });
+
+      if (!existingConversation) {
+
+        return c.json(
+          {
+            success: false,
+            message:
+              "Conversation not found",
+          },
+          404
+        );
+      }
+
       const conversation =
         await prisma.conversation.update({
+
           where: {
             id,
           },
@@ -147,6 +206,8 @@ export const updateConversationTitle =
       });
 
     } catch (error) {
+
+      console.error(error);
 
       return c.json(
         {

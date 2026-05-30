@@ -4,8 +4,12 @@ import {
   getUsers,
   register,
   login,
-  logout,
+    logout,
+  getMe,
 } from "../controllers/user.controller.js";
+
+import { authMiddleware }
+    from "../middleware/auth.middleware.js";
 
 const userRouter = new Hono();
 
@@ -24,6 +28,12 @@ userRouter.post(
 userRouter.post(
   "/logout",
   logout
+);
+
+userRouter.get(
+  "/me",
+  authMiddleware,
+  getMe
 );
 
 export default userRouter;

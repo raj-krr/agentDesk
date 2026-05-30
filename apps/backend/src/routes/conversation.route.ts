@@ -2,13 +2,17 @@ import { Hono } from "hono";
 
 import {
   createNewConversation,
+  getConversationById,
+  getAllConversations,
+  updateConversationTitle,
 } from "../controllers/conversation.controller.js";
 
-import { getConversationById } from "../controllers/conversation.controller.js";
-import { getAllConversations } from "../controllers/conversation.controller.js";
-import { updateConversationTitle } from "../controllers/conversation.controller.js";
+import { authMiddleware }
+from "../middleware/auth.middleware.js";
 
 const conversationRouter = new Hono();
+
+conversationRouter.use("*", authMiddleware);
 
 conversationRouter.post(
   "/",
@@ -29,4 +33,5 @@ conversationRouter.patch(
   "/:id",
   updateConversationTitle
 );
+
 export default conversationRouter;

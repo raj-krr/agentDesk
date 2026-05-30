@@ -1,6 +1,21 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../db/prisma.js";
 
+export const getUserProfile = async (
+  userId: string
+) => {
+  return prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      createdAt: true,
+    },
+  });
+};
 
 export const getUserSupportContext = async (
   userId: string

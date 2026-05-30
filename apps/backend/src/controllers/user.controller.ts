@@ -6,6 +6,7 @@ import {
   getAllUsers,
   getUserByEmail,
   createUser,
+  getUserProfile
 } from "../services/user.service.js";
 
 export const getUsers = async (c: Context) => {
@@ -14,6 +15,24 @@ export const getUsers = async (c: Context) => {
   return c.json({
     success: true,
     users,
+  });
+};
+
+export const getMe = async (
+  c: Context
+) => {
+
+  const userData =
+    c.get("user");
+
+  const user =
+    await getUserProfile(
+      userData.userId
+    );
+
+  return c.json({
+    success: true,
+    user,
   });
 };
 
@@ -79,12 +98,16 @@ export const login = async (c: Context) => {
       );
     }
 
+    console.log("Entered password:", password);
+console.log("Stored password:", user.password);
+
     const validPassword =
       await bcrypt.compare(
         password,
         user.password
       );
 
+    console.log("Password Match:", validPassword);
     if (!validPassword) {
       return c.json(
         {
