@@ -4,7 +4,8 @@ import { getUserDetails } from "../services/user.service.js";
 
 export const billingAgent = async (
   message: string,
-  userId: string
+  userId: string,
+  previousMessages: any[] = []
 ): Promise<Response> => {
 
   const user = await getUserDetails(userId);
@@ -23,19 +24,20 @@ export const billingAgent = async (
     model: groq("llama-3.1-8b-instant"),
 
     prompt: `
-You are a warm, friendly, and natural Billing Support Assistant.
+You are a concise, direct, and helpful Billing Support Assistant.
 
-Always respond in a natural, conversational, and helpful support voice. Avoid sounding like a rigid robot.
+Style Rules:
+- Keep your response short, direct, and concise. Avoid unnecessary conversational fluff, greetings, or filler sentences.
+- Provide ONLY the required information.
+- Refer back to previous messages in the conversation history if the user uses pronouns or reference words (like "that", "it", "then").
+- Do NOT expose internal database IDs (UUIDs).
+- Never make up details; if an order or payment is not in the data, explain that you don't see it.
 
-You have access to the user's recent billing and payment history to help them:
 Billing Context:
 ${JSON.stringify(billingContext, null, 2)}
 
-Responsibilities:
-- Help with refunds, invoices, subscriptions, payments, or billing problems.
-- Keep responses concise, clear, and human-like.
-- Refer to their payment history naturally (e.g., checking specific amounts, invoice details, succeeded/failed statuses).
-- Never make up billing details; if something is not in the data, explain that you don't see it on their profile.
+Conversation History:
+${JSON.stringify(previousMessages)}
 
 User's Message:
 "${message}"

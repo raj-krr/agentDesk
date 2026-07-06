@@ -307,7 +307,7 @@ export default function ChatPage() {
           false
         );
       }
-  };
+    };
 
   const refreshUser = async () => {
     try {
@@ -400,7 +400,7 @@ export default function ChatPage() {
 
       </section>
 
-      <SandboxPanel isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} onDataSeeded={refreshUser} />
+      <SandboxPanel isOpen={isSandboxOpen} onClose={() => setIsSandboxOpen(false)} onDataSeeded={refreshUser} user={user} />
     </main>
   );
 }

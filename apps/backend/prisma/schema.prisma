@@ -45,16 +45,19 @@ model Message {
 }
 
 model Order {
-  id           String   @id @default(uuid())
+  id               String    @id @default(uuid())
 
-  userId       String
-  user         User     @relation(fields: [userId], references: [id])
+  userId           String
+  user             User      @relation(fields: [userId], references: [id])
 
-  productName  String
-  trackingId   String?
-  status       String
+  productName      String
+  trackingId       String?
+  status           String
+  expectedDelivery String?
 
-  createdAt    DateTime @default(now())
+  payments         Payment[]
+
+  createdAt        DateTime  @default(now())
 }
 
 model Payment {
@@ -63,12 +66,15 @@ model Payment {
   userId      String
   user        User      @relation(fields: [userId], references: [id])
 
+  orderId     String?
+  order       Order?    @relation(fields: [orderId], references: [id])
+
   amount      Float
   status      String
 
   invoices    Invoice[]
 
-  createdAt   DateTime @default(now())
+  createdAt   DateTime  @default(now())
 }
 
 model Invoice {

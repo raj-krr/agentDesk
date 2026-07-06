@@ -7,9 +7,10 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onDataSeeded?: () => void;
+  user?: any;
 }
 
-export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
+export default function SandboxPanel({ isOpen, onClose, onDataSeeded, user }: Props) {
   const [activeTab, setActiveTab] = useState<"templates" | "order" | "payment">("templates");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
@@ -19,12 +20,15 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
     productName: "",
     status: "Processing",
     trackingId: "",
+    expectedDelivery: "",
+    price: "199.99",
   });
 
   // Custom Payment Form state
   const [paymentForm, setPaymentForm] = useState({
     amount: "",
     status: "Succeeded",
+    orderId: "",
   });
 
   if (!isOpen) return null;
@@ -38,17 +42,21 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
     setLoading(true);
     try {
       if (type === "airpods_delayed") {
-        await createMockOrder("AirPods Max", "Delayed", "TRK-DELAYED-8899");
-        showSuccess("Seeded Delayed AirPods Max Order!");
+        const orderRes = await createMockOrder("AirPods Max", "Delayed", "TRK-DELAYED-8899", "July 12, 2026");
+        await createMockPayment(549.00, "Succeeded", orderRes.order.id);
+        showSuccess("Seeded Delayed AirPods Max Order & Payment!");
       } else if (type === "iphone_cancelled") {
-        await createMockOrder("iPhone 15 Pro Max", "Cancelled", "TRK-CANCELLED-1002");
-        showSuccess("Seeded Cancelled iPhone 15 Order!");
+        const orderRes = await createMockOrder("iPhone 15 Pro Max", "Cancelled", "TRK-CANCELLED-1002", "Cancelled");
+        await createMockPayment(1199.00, "Failed", orderRes.order.id);
+        showSuccess("Seeded Cancelled iPhone 15 Order & Failed Payment!");
       } else if (type === "double_charge") {
-        await createMockPayment(149.99, "Failed");
-        showSuccess("Seeded Failed Payment ($149.99)!");
+        const orderRes = await createMockOrder("Leather Case", "Processing", "TRK-CASE-4500", "July 9, 2026");
+        await createMockPayment(149.99, "Failed", orderRes.order.id);
+        showSuccess("Seeded Leather Case Order & Failed Payment ($149.99)!");
       } else if (type === "sub_refund") {
-        await createMockPayment(19.99, "Pending");
-        showSuccess("Seeded Pending Refund Payment ($19.99)!");
+        const orderRes = await createMockOrder("Cloud Storage Premium", "Delivered", "TRK-CLOUD-9900", "Delivered");
+        await createMockPayment(19.99, "Pending", orderRes.order.id);
+        showSuccess("Seeded Cloud Storage Order & Pending Refund ($19.99)!");
       }
       onDataSeeded?.();
     } catch (err) {
@@ -64,13 +72,22 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
     if (!orderForm.productName) return;
     setLoading(true);
     try {
-      await createMockOrder(
+      // 1. Create Order
+      const orderRes = await createMockOrder(
         orderForm.productName,
         orderForm.status,
-        orderForm.trackingId || undefined
+        orderForm.trackingId || undefined,
+        orderForm.expectedDelivery || undefined
       );
-      showSuccess(`Created order for ${orderForm.productName}!`);
-      setOrderForm({ productName: "", status: "Processing", trackingId: "" });
+
+      // 2. Create Succeeded Payment auto-associated with order
+      const priceVal = parseFloat(orderForm.price);
+      if (!isNaN(priceVal)) {
+        await createMockPayment(priceVal, "Succeeded", orderRes.order.id);
+      }
+
+      showSuccess(`Created order and matching payment for ${orderForm.productName}!`);
+      setOrderForm({ productName: "", status: "Processing", trackingId: "", expectedDelivery: "", price: "199.99" });
       onDataSeeded?.();
     } catch (err) {
       console.error(err);
@@ -82,12 +99,15 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
 
   const handleCreatePayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!paymentForm.amount) return;
+    if (!paymentForm.amount || !paymentForm.orderId) {
+      alert("Amount and Associated Order are required");
+      return;
+    }
     setLoading(true);
     try {
-      await createMockPayment(parseFloat(paymentForm.amount), paymentForm.status);
-      showSuccess(`Created $${paymentForm.amount} payment!`);
-      setPaymentForm({ amount: "", status: "Succeeded" });
+      await createMockPayment(parseFloat(paymentForm.amount), paymentForm.status, paymentForm.orderId);
+      showSuccess(`Created $${paymentForm.amount} payment linked to order!`);
+      setPaymentForm({ amount: "", status: "Succeeded", orderId: "" });
       onDataSeeded?.();
     } catch (err) {
       console.error(err);
@@ -174,7 +194,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               className="w-full text-left border rounded-xl p-3 hover:bg-zinc-50 transition flex flex-col"
             >
               <span className="font-semibold text-sm">🎧 AirPods Max (Delayed Shipping)</span>
-              <span className="text-xs text-zinc-500 mt-1">Order status is set to "Delayed" with tracking: TRK-DELAYED-8899.</span>
+              <span className="text-xs text-zinc-500 mt-1">Order status is set to "Delayed" with tracking: TRK-DELAYED-8899 and active payment of $549.00.</span>
             </button>
 
             <button
@@ -182,7 +202,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               className="w-full text-left border rounded-xl p-3 hover:bg-zinc-50 transition flex flex-col"
             >
               <span className="font-semibold text-sm">📱 iPhone 15 Pro Max (Cancelled)</span>
-              <span className="text-xs text-zinc-500 mt-1">Order status is set to "Cancelled" with tracking: TRK-CANCELLED-1002.</span>
+              <span className="text-xs text-zinc-500 mt-1">Order status is set to "Cancelled" with tracking: TRK-CANCELLED-1002 and failed payment.</span>
             </button>
 
             <button
@@ -190,7 +210,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               className="w-full text-left border rounded-xl p-3 hover:bg-zinc-50 transition flex flex-col"
             >
               <span className="font-semibold text-sm">💳 Double Charges (Failed Payment)</span>
-              <span className="text-xs text-zinc-500 mt-1">Creates a $149.99 failed payment and its matching invoice.</span>
+              <span className="text-xs text-zinc-500 mt-1">Creates a $149.99 failed payment on Leather Case order.</span>
             </button>
 
             <button
@@ -198,7 +218,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               className="w-full text-left border rounded-xl p-3 hover:bg-zinc-50 transition flex flex-col"
             >
               <span className="font-semibold text-sm">🔄 Subscription Refund (Pending Payment)</span>
-              <span className="text-xs text-zinc-500 mt-1">Creates a $19.99 pending payment and associated invoice.</span>
+              <span className="text-xs text-zinc-500 mt-1">Creates a $19.99 pending refund on Cloud Storage order.</span>
             </button>
           </div>
         )}
@@ -207,7 +227,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
         {activeTab === "order" && !loading && (
           <form onSubmit={handleCreateOrder} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-zinc-600 mb-1">Product Name</label>
+              <label className="block text-xs font-medium text-zinc-500 mb-1">Product Name</label>
               <input
                 type="text"
                 value={orderForm.productName}
@@ -218,23 +238,48 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-zinc-600 mb-1">Status</label>
-              <select
-                value={orderForm.status}
-                onChange={(e) => setOrderForm({ ...orderForm, status: e.target.value })}
-                className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
-              >
-                <option value="Processing">Processing</option>
-                <option value="Shipped">Shipped</option>
-                <option value="Delivered">Delivered</option>
-                <option value="Delayed">Delayed</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-zinc-500 mb-1">Status</label>
+                <select
+                  value={orderForm.status}
+                  onChange={(e) => setOrderForm({ ...orderForm, status: e.target.value })}
+                  className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                >
+                  <option value="Processing">Processing</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Delayed">Delayed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-zinc-500 mb-1">Price ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={orderForm.price}
+                  onChange={(e) => setOrderForm({ ...orderForm, price: e.target.value })}
+                  className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                  required
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-zinc-600 mb-1">Tracking ID (Optional)</label>
+              <label className="block text-xs font-medium text-zinc-500 mb-1">Expected Delivery (Optional)</label>
+              <input
+                type="text"
+                value={orderForm.expectedDelivery}
+                onChange={(e) => setOrderForm({ ...orderForm, expectedDelivery: e.target.value })}
+                placeholder="e.g. 2026-07-10 or 3 Days"
+                className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-zinc-500 mb-1">Tracking ID (Optional)</label>
               <input
                 type="text"
                 value={orderForm.trackingId}
@@ -248,7 +293,7 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
               type="submit"
               className="w-full bg-black text-white rounded-lg py-2.5 text-sm font-semibold hover:opacity-90 transition"
             >
-              Seed Custom Order
+              Seed Custom Order & Payment
             </button>
           </form>
         )}
@@ -257,7 +302,24 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded }: Props) {
         {activeTab === "payment" && !loading && (
           <form onSubmit={handleCreatePayment} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-zinc-600 mb-1">Amount ($)</label>
+              <label className="block text-xs font-medium text-zinc-655 mb-1">Associate with Order</label>
+              <select
+                value={paymentForm.orderId}
+                onChange={(e) => setPaymentForm({ ...paymentForm, orderId: e.target.value })}
+                className="w-full border rounded-lg p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+                required
+              >
+                <option value="">-- Select an Order --</option>
+                {user?.orders?.map((o: any) => (
+                  <option key={o.id} value={o.id}>
+                    {o.productName} ({o.status})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-medium text-zinc-655 mb-1">Amount ($)</label>
               <input
                 type="number"
                 step="0.01"

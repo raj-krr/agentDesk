@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { prisma } from "../db/prisma.js";
 
 export const getUserProfile = async (
@@ -76,6 +76,14 @@ export const getUserDetails = async (
           productName: true,
           status: true,
           trackingId: true,
+          expectedDelivery: true,
+          payments: {
+            select: {
+              id: true,
+              amount: true,
+              status: true,
+            },
+          },
           createdAt: true,
         },
       },
@@ -89,6 +97,14 @@ export const getUserDetails = async (
           id: true,
           amount: true,
           status: true,
+          orderId: true,
+          order: {
+            select: {
+              id: true,
+              productName: true,
+              status: true,
+            },
+          },
           createdAt: true,
 
           invoices: {

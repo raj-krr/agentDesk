@@ -4,7 +4,8 @@ import { getAuthHeaders } from "./auth";
 export const createMockOrder = async (
   productName: string,
   status: string,
-  trackingId?: string
+  trackingId?: string,
+  expectedDelivery?: string
 ) => {
   const response = await fetch(API.ORDERS, {
     method: "POST",
@@ -13,19 +14,21 @@ export const createMockOrder = async (
       productName,
       status,
       trackingId,
+      expectedDelivery,
     }),
   });
 
   return response.json();
 };
 
-export const createMockPayment = async (amount: number, status: string) => {
+export const createMockPayment = async (amount: number, status: string, orderId?: string) => {
   const response = await fetch(API.PAYMENTS, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({
       amount,
       status,
+      orderId,
     }),
   });
 

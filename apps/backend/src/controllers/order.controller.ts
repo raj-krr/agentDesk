@@ -24,7 +24,7 @@ export const getOrders = async (c: Context) => {
 export const createMockOrder = async (c: Context) => {
   try {
     const body = await c.req.json();
-    const { productName, status, trackingId } = body;
+    const { productName, status, trackingId, expectedDelivery } = body;
     const user = c.get("user");
 
     if (!productName || !status) {
@@ -41,7 +41,8 @@ export const createMockOrder = async (c: Context) => {
       user.userId,
       productName,
       status,
-      trackingId
+      trackingId,
+      expectedDelivery
     );
 
     return c.json(

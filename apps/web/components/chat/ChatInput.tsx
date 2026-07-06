@@ -6,14 +6,14 @@ import {
 
 interface Props {
   onSend:
-    (message: string)
-      => void;
+  (message: string)
+    => void;
 }
 
 export default function
-ChatInput({
-  onSend,
-}: Props) {
+  ChatInput({
+    onSend,
+  }: Props) {
 
   const [message,
     setMessage] =

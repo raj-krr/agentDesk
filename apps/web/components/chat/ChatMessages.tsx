@@ -5,9 +5,9 @@ interface Props {
 }
 
 export default function
-ChatMessages({
-  messages,
-}: Props) {
+  ChatMessages({
+    messages,
+  }: Props) {
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
@@ -20,12 +20,11 @@ ChatMessages({
 
           <div
             key={index}
-            className={`mb-4 ${
-              message.role ===
-              "user"
+            className={`mb-4 ${message.role ===
+                "user"
                 ? "text-right"
                 : ""
-            }`}
+              }`}
           >
 
             <div

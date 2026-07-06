@@ -15,7 +15,8 @@ export const createOrder = async (
   userId: string,
   productName: string,
   status: string,
-  trackingId?: string
+  trackingId?: string,
+  expectedDelivery?: string
 ) => {
   return prisma.order.create({
     data: {
@@ -23,6 +24,7 @@ export const createOrder = async (
       productName,
       status,
       trackingId,
+      expectedDelivery,
     },
   });
 };

@@ -4,7 +4,7 @@ import { prisma } from "../db/prisma.js";
 export const createMockPayment = async (c: Context) => {
   try {
     const body = await c.req.json();
-    const { amount, status } = body;
+    const { amount, status, orderId } = body;
     const user = c.get("user");
 
     if (amount === undefined || !status) {
@@ -35,6 +35,7 @@ export const createMockPayment = async (c: Context) => {
           userId: user.userId,
           amount: numericAmount,
           status: status,
+          orderId: orderId || undefined,
         },
       });
 
