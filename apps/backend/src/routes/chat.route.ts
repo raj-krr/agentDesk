@@ -1,37 +1,22 @@
 import { Hono } from "hono";
 
-import {
-  createNewConversation,
-  getConversationById,
-  getAllConversations,
-  updateConversationTitle,
-} from "../controllers/conversation.controller.js";
+import { sendMessage }
+from "../controllers/chat.controller.js";
 
 import { authMiddleware }
 from "../middleware/auth.middleware.js";
 
-const conversationRouter = new Hono();
+const chatRouter =
+  new Hono();
 
-conversationRouter.use("*", authMiddleware);
-
-conversationRouter.post(
-  "/",
-  createNewConversation
+chatRouter.use(
+  "*",
+  authMiddleware
 );
 
-conversationRouter.get(
-  "/:id",
-  getConversationById
+chatRouter.post(
+  "/messages",
+  sendMessage
 );
 
-conversationRouter.get(
-  "/",
-  getAllConversations
-);
-
-conversationRouter.patch(
-  "/:id",
-  updateConversationTitle
-);
-
-export default conversationRouter;
+export default chatRouter;

@@ -21,9 +21,41 @@ export const isAuthenticated = () => {
   );
 };
 
+export const getStoredUser = () => {
+  const user =
+    localStorage.getItem("user");
+
+  return user
+    ? JSON.parse(user)
+    : null;
+};
+
+export const fetchCurrentUser =
+  async () => {
+
+    const response =
+      await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/users/me`,
+        {
+          headers:
+            getAuthHeaders(),
+        }
+      );
+
+    const data =
+      await response.json();
+
+    return data;
+  };
+
 export const logout = () => {
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
+  localStorage.removeItem(
+    "token"
+  );
+
+  localStorage.removeItem(
+    "user"
+  );
 
   window.location.href =
     "/auth/login";

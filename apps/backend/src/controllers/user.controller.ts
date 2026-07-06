@@ -6,7 +6,7 @@ import {
   getAllUsers,
   getUserByEmail,
   createUser,
-  getUserProfile
+  getUserDetails
 } from "../services/user.service.js";
 
 export const getUsers = async (c: Context) => {
@@ -21,19 +21,45 @@ export const getUsers = async (c: Context) => {
 export const getMe = async (
   c: Context
 ) => {
+  try {
 
-  const userData =
-    c.get("user");
+    const user =
+      c.get("user");
 
-  const user =
-    await getUserProfile(
-      userData.userId
+    const profile =
+      await getUserDetails(
+        user.userId
+      );
+
+    if (!profile) {
+      return c.json(
+        {
+          success: false,
+          message:
+            "User not found",
+        },
+        404
+      );
+    }
+
+    return c.json({
+      success: true,
+      user: profile,
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    return c.json(
+      {
+        success: false,
+        message:
+          "Failed to fetch user",
+      },
+      500
     );
-
-  return c.json({
-    success: true,
-    user,
-  });
+  }
 };
 
 export const register = async (c: Context) => {
@@ -69,6 +95,7 @@ export const register = async (c: Context) => {
       201
     );
   } catch (error) {
+    console.error("REGISTRATION ERROR:", error);
     return c.json(
       {
         success: false,
@@ -139,10 +166,16 @@ console.log("Stored password:", user.password);
       },
     });
   } catch (error) {
+      console.error(
+    "LOGIN ERROR:",
+    error
+  );
+
     return c.json(
       {
         success: false,
         message: "Login failed",
+         error: String(error),
       },
       500
     );

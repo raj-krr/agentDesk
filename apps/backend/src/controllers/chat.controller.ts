@@ -1,5 +1,7 @@
 import type { Context } from "hono";
-
+import { generateText } from "ai";
+import { groq } from "../lib/groq.js";
+import { prisma } from "../db/prisma.js";
 import { routerAgent } from "../agents/router.agent.js";
 
 import {
@@ -51,6 +53,27 @@ export const sendMessage = async (
       "user",
       message
     );
+
+    // If the conversation title is default "New Conversation", generate a summary title
+    if (conversation.title === "New Conversation") {
+      try {
+        const titleResult = await generateText({
+          model: groq("llama-3.1-8b-instant"),
+          prompt: `Generate a very short, concise, and clean summary of the following user query to be used as a chat conversation title.
+Max 3-5 words. Do NOT wrap in quotes. Do NOT add a period. Do NOT include words like "Query:", "Title:", "Summary:", or "Conversation:".
+User query: "${message}"`
+        });
+        const generatedTitle = titleResult.text.trim().replace(/^["']|["']$/g, '');
+        
+        // Update title in the database
+        await prisma.conversation.update({
+          where: { id: conversationId },
+          data: { title: generatedTitle },
+        });
+      } catch (err) {
+        console.error("Failed to generate AI conversation title:", err);
+      }
+    }
 
     // Get previous messages
     const previousMessages =

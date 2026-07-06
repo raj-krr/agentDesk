@@ -14,4 +14,6 @@ export const API = {
     `${BACKEND_URL}/conversations`,
   ORDERS:
     `${BACKEND_URL}/orders`,
+  PAYMENTS:
+    `${BACKEND_URL}/payments`,
 };

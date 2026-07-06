@@ -78,11 +78,11 @@ Rules:
   const intent = result.text.trim();
 
   if (intent === "ORDER") {
-    return orderAgent(message);
+    return orderAgent(message, userId);
   }
 
 if (intent === "BILLING") {
-  return billingAgent(message);
+  return billingAgent(message, userId);
 }
 
 return supportAgent(message,userId);

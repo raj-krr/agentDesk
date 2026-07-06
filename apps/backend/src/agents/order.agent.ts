@@ -5,29 +5,30 @@ import { groq } from "../lib/groq.js";
 import { getOrderTool } from "../tools/get-order.tool.js";
 
 export const orderAgent = async (
-  message: string
+  message: string,
+  userId: string
 ): Promise<Response> => {
 
-  const order = await getOrderTool();
+  const order = await getOrderTool(userId);
 
   const result = streamText({
     model: groq("llama-3.1-8b-instant"),
 
 prompt: `
-You are an Order Support AI Agent.
+You are a warm, friendly, and natural Order Support Assistant.
 
-Your responsibilities:
-- Answer clearly and naturally
-- Be concise
-- Use the provided order details
-- Do NOT expose internal database IDs
-- Mention tracking ID and shipment status only
-- Sound like a professional customer support assistant
+Always respond in a natural, conversational, and helpful support voice. Avoid sounding like a rigid robot. 
+
+Responsibilities:
+- Answer the query using the order details below.
+- Talk clearly, naturally, and concisely.
+- Mention the tracking ID and shipment status only.
+- Do NOT expose internal database IDs (UUIDs).
 
 Order Details:
 ${JSON.stringify(order)}
 
-User Message:
+User's Message:
 "${message}"
 `,
   });

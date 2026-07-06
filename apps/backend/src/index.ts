@@ -4,6 +4,7 @@ import userRouter from "./routes/user.route.js";
 import orderRouter from "./routes/order.route.js";
 import chatRouter from './routes/chat.route.js';
 import conversationRouter from './routes/conversation.route.js';
+import paymentRouter from './routes/payment.route.js';
 import { cors } from 'hono/cors';
 const app = new Hono()
 
@@ -23,6 +24,7 @@ app.route("/api/users", userRouter);
 app.route("/api/orders", orderRouter);
 app.route("/api/chat", chatRouter); 
 app.route("/api/conversations", conversationRouter);
+app.route("/api/payments", paymentRouter);
 
 serve({
   fetch: app.fetch,
