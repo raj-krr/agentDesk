@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { getAuthHeaders } from "@/lib/auth";
+import { API } from "@/lib/api";
 
 interface Props {
   conversations: any[];
@@ -8,6 +10,7 @@ interface Props {
   onSelect: (id: string) => void;
   onCreate: () => void;
   user: any;
+  onRefreshUser?: () => void;
 }
 
 export default function ConversationSidebar({
@@ -16,8 +19,33 @@ export default function ConversationSidebar({
   onSelect,
   onCreate,
   user,
+  onRefreshUser,
 }: Props) {
   const [activeTab, setActiveTab] = useState<"chats" | "account">("chats");
+  const [returningId, setReturningId] = useState<string | null>(null);
+
+  const handleReturnOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to return this order?")) return;
+    setReturningId(orderId);
+    try {
+      const response = await fetch(`${API.ORDERS}/${orderId}/return`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Order successfully returned. Your refund has been processed.");
+        onRefreshUser?.();
+      } else {
+        alert(data.message || "Failed to return order");
+      }
+    } catch (error) {
+      console.error("Error returning order:", error);
+      alert("An error occurred while returning the order.");
+    } finally {
+      setReturningId(null);
+    }
+  };
 
   return (
     <aside className="w-80 border-r flex flex-col h-full bg-zinc-50">
@@ -103,7 +131,11 @@ export default function ConversationSidebar({
                                 ? "bg-amber-50 text-amber-700"
                                 : order.status === "Cancelled"
                                   ? "bg-red-50 text-red-700"
-                                  : "bg-blue-50 text-blue-700"
+                                  : order.status === "Returned"
+                                    ? "bg-purple-50 text-purple-700"
+                                    : order.status === "Return Initiated"
+                                      ? "bg-indigo-50 text-indigo-700"
+                                      : "bg-blue-50 text-blue-700"
                             }`}
                         >
                           {order.status}
@@ -120,6 +152,67 @@ export default function ConversationSidebar({
                         <div className="text-[10px] text-zinc-500 bg-zinc-50 p-1.5 rounded border border-dashed flex justify-between">
                           <span>Tracking:</span>
                           <span className="font-mono font-bold text-zinc-700">{order.trackingId}</span>
+                        </div>
+                      )}
+
+                      {order.status === "Delivered" && order.deliveredAt && (() => {
+                        const deliveryDate = new Date(order.deliveredAt);
+                        const expiryDate = new Date(deliveryDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+                        const isEligible = Date.now() <= expiryDate.getTime();
+
+                        return (
+                          <div className="mt-2 pt-2 border-t border-zinc-100 space-y-1.5">
+                            <div className="flex justify-between items-center text-[10px] text-zinc-500">
+                              <span>Return Window:</span>
+                              <span className={isEligible ? "text-emerald-600 font-semibold" : "text-zinc-400"}>
+                                {isEligible 
+                                  ? `Eligible (expires ${expiryDate.toLocaleDateString()})` 
+                                  : `Expired on ${expiryDate.toLocaleDateString()}`
+                                }
+                              </span>
+                            </div>
+                            {isEligible && (
+                              <button
+                                onClick={() => handleReturnOrder(order.id)}
+                                disabled={returningId === order.id}
+                                className="w-full bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg py-1.5 text-[10px] font-bold transition disabled:opacity-50 flex items-center justify-center gap-1"
+                              >
+                                {returningId === order.id ? (
+                                  <>
+                                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                    Processing...
+                                  </>
+                                ) : (
+                                  "Return Item"
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {order.status === "Return Initiated" && order.returnInitiatedAt && (() => {
+                        const initiatedDate = new Date(order.returnInitiatedAt);
+                        const pickupDate = new Date(initiatedDate.getTime() + 2 * 24 * 60 * 60 * 1000);
+
+                        return (
+                          <div className="mt-2 pt-2 border-t border-zinc-100 space-y-1.5 bg-indigo-50/50 p-2.5 rounded-xl border border-indigo-100/50">
+                            <div className="font-bold text-indigo-800 text-[10px] uppercase tracking-wider flex items-center gap-1">
+                              🔄 Return Initiated
+                            </div>
+                            <div className="text-[10px] text-zinc-600">
+                              Expected pickup: <span className="font-semibold text-zinc-800">{pickupDate.toLocaleDateString()}</span>
+                            </div>
+                            <div className="text-[9px] text-indigo-700 font-medium">
+                              Refund will be completed after pickup.
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {order.status === "Returned" && (
+                        <div className="mt-2 pt-2 border-t border-zinc-100 text-[10px] text-purple-700 font-semibold bg-purple-50 p-1.5 rounded text-center">
+                          Returned & Refunded Successfully
                         </div>
                       )}
 

@@ -346,6 +346,7 @@ export default function ChatPage() {
           handleNewConversation
         }
         user={user}
+        onRefreshUser={refreshUser}
       />
 
       <section className="flex-1 flex flex-col">
@@ -390,6 +391,7 @@ export default function ChatPage() {
           onSend={
             handleSendMessage
           }
+          disabled={sending}
         />
 
         {sending && (

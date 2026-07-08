@@ -5,7 +5,8 @@ export const createMockOrder = async (
   productName: string,
   status: string,
   trackingId?: string,
-  expectedDelivery?: string
+  expectedDelivery?: string,
+  deliveredAt?: string
 ) => {
   const response = await fetch(API.ORDERS, {
     method: "POST",
@@ -15,6 +16,7 @@ export const createMockOrder = async (
       status,
       trackingId,
       expectedDelivery,
+      deliveredAt,
     }),
   });
 

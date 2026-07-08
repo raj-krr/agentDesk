@@ -28,7 +28,7 @@ export default function
           >
 
             <div
-              className="inline-block border rounded-2xl px-4 py-3"
+              className="inline-block border rounded-2xl px-4 py-3 whitespace-pre-wrap"
             >
               {message.content}
             </div>

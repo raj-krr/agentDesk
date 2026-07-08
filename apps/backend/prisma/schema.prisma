@@ -54,6 +54,8 @@ model Order {
   trackingId       String?
   status           String
   expectedDelivery String?
+  deliveredAt      DateTime?
+  returnInitiatedAt DateTime?
 
   payments         Payment[]
 

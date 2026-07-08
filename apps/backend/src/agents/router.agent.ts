@@ -5,7 +5,7 @@ import { orderAgent } from "./order.agent.js";
 import { billingAgent } from "./billing.agent.js";
 import { supportAgent } from "./support.agent.js";
 
-export const routerAgent = async (message: string,previousMessages: any[],  conversationId: string, userId: string) : Promise<Response>=> {
+export const routerAgent = async (message: string, previousMessages: any[], conversationId: string, userId: string) : Promise<{ intent: string; response: Response }> => {
   const result = await generateText({
     model: groq("llama-3.1-8b-instant"),
 
@@ -41,6 +41,7 @@ SUPPORT:
 - FAQs
 - account help
 - general support
+- greetings and chitchat (e.g. hello, hi, hey, good morning, thanks)
 
 Examples:
 
@@ -62,6 +63,12 @@ Answer: SUPPORT
 User: "App is not working"
 Answer: SUPPORT
 
+User: "hello"
+Answer: SUPPORT
+
+User: "hi there"
+Answer: SUPPORT
+
 Conversation History:
 ${JSON.stringify(previousMessages)}
 
@@ -69,21 +76,29 @@ Current User Message:
 "${message}"
 
 Rules:
-- Return ONLY one category
+- Return ONLY one category (ORDER, BILLING, or SUPPORT)
+- If the message is a simple greeting, general chitchat, or does not clearly fit into ORDER or BILLING, classify it as SUPPORT.
 - No explanation
 - No extra text
 `,
   });
 
-  const intent = result.text.trim();
+  const rawIntent = result.text.toUpperCase().trim();
+  let intent = "SUPPORT";
+  if (rawIntent.includes("ORDER")) {
+    intent = "ORDER";
+  } else if (rawIntent.includes("BILLING")) {
+    intent = "BILLING";
+  }
 
+  let response: Response;
   if (intent === "ORDER") {
-    return orderAgent(message, userId, previousMessages);
+    response = await orderAgent(message, userId, previousMessages);
+  } else if (intent === "BILLING") {
+    response = await billingAgent(message, userId, previousMessages);
+  } else {
+    response = await supportAgent(message, userId, previousMessages);
   }
 
-  if (intent === "BILLING") {
-    return billingAgent(message, userId, previousMessages);
-  }
-
-  return supportAgent(message, userId, previousMessages);
+  return { intent, response };
 };

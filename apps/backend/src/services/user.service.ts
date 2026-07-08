@@ -77,6 +77,8 @@ export const getUserDetails = async (
           status: true,
           trackingId: true,
           expectedDelivery: true,
+          deliveredAt: true,
+          returnInitiatedAt: true,
           payments: {
             select: {
               id: true,

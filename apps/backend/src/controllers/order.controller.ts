@@ -1,5 +1,6 @@
 import type { Context } from "hono";
-import { getLatestOrder, createOrder } from "../services/order.service.js";
+import { prisma } from "../db/prisma.js";
+import { getLatestOrder, createOrder, returnOrder, processPickupAndRefund } from "../services/order.service.js";
 
 export const getOrders = async (c: Context) => {
   try {
@@ -24,7 +25,7 @@ export const getOrders = async (c: Context) => {
 export const createMockOrder = async (c: Context) => {
   try {
     const body = await c.req.json();
-    const { productName, status, trackingId, expectedDelivery } = body;
+    const { productName, status, trackingId, expectedDelivery, deliveredAt } = body;
     const user = c.get("user");
 
     if (!productName || !status) {
@@ -42,7 +43,8 @@ export const createMockOrder = async (c: Context) => {
       productName,
       status,
       trackingId,
-      expectedDelivery
+      expectedDelivery,
+      deliveredAt
     );
 
     return c.json(
@@ -61,5 +63,99 @@ export const createMockOrder = async (c: Context) => {
       },
       500
     );
+  }
+};
+
+export const processOrderReturn = async (c: Context) => {
+  try {
+    const orderId = c.req.param("id");
+    const user = c.get("user");
+
+    const order = await returnOrder(orderId, user.userId);
+
+    return c.json({
+      success: true,
+      message: "Order successfully returned",
+      order,
+    });
+  } catch (error: any) {
+    console.error("RETURN ORDER ERROR:", error);
+    return c.json(
+      {
+        success: false,
+        message: error.message || "Failed to return order",
+      },
+      400
+    );
+  }
+};
+
+export const processOrderRefund = async (c: Context) => {
+  try {
+    const orderId = c.req.param("id");
+    const user = c.get("user");
+
+    const order = await processPickupAndRefund(orderId, user.userId);
+
+    return c.json({
+      success: true,
+      message: "Order successfully refunded after pickup",
+      order,
+    });
+  } catch (error: any) {
+    console.error("REFUND ORDER ERROR:", error);
+    return c.json(
+      {
+        success: false,
+        message: error.message || "Failed to process refund",
+      },
+      400
+    );
+  }
+};
+
+export const updateOrderStatus = async (c: Context) => {
+  try {
+    const orderId = c.req.param("id");
+    const { status } = await c.req.json();
+    const user = c.get("user");
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    });
+
+    if (!order) {
+      return c.json({ success: false, message: "Order not found" }, 404);
+    }
+
+    if (order.userId !== user.userId) {
+      return c.json({ success: false, message: "Unauthorized" }, 403);
+    }
+
+    const updateData: any = { status };
+    if (status === "Delivered") {
+      updateData.deliveredAt = new Date();
+    } else if (status === "Return Initiated") {
+      updateData.returnInitiatedAt = new Date();
+    } else {
+      if (status === "Processing" || status === "Shipped" || status === "Delayed" || status === "Cancelled") {
+        updateData.deliveredAt = null;
+        updateData.returnInitiatedAt = null;
+      }
+    }
+
+    const updated = await prisma.order.update({
+      where: { id: orderId },
+      data: updateData
+    });
+
+    return c.json({
+      success: true,
+      message: `Order status updated to ${status}`,
+      order: updated
+    });
+  } catch (error: any) {
+    console.error("UPDATE ORDER STATUS ERROR:", error);
+    return c.json({ success: false, message: error.message || "Failed to update order status" }, 500);
   }
 };

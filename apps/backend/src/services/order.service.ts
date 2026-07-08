@@ -16,7 +16,8 @@ export const createOrder = async (
   productName: string,
   status: string,
   trackingId?: string,
-  expectedDelivery?: string
+  expectedDelivery?: string,
+  deliveredAt?: Date | string
 ) => {
   return prisma.order.create({
     data: {
@@ -25,6 +26,82 @@ export const createOrder = async (
       status,
       trackingId,
       expectedDelivery,
+      deliveredAt: deliveredAt ? new Date(deliveredAt) : null,
     },
+  });
+};
+
+export const returnOrder = async (orderId: string, userId: string) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (order.status !== "Delivered") {
+    throw new Error("Only delivered orders can be returned");
+  }
+
+  if (!order.deliveredAt) {
+    throw new Error("Order delivery date is not set");
+  }
+
+  const deliveryDate = new Date(order.deliveredAt);
+  const now = new Date();
+  const diffTime = now.getTime() - deliveryDate.getTime();
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+  if (diffDays > 7) {
+    throw new Error("Return window has expired (7 days)");
+  }
+
+  return prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status: "Return Initiated",
+      returnInitiatedAt: new Date(),
+    },
+  });
+};
+
+export const processPickupAndRefund = async (orderId: string, userId: string) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (order.status !== "Return Initiated") {
+    throw new Error("Order is not in Return Initiated state");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const updatedOrder = await tx.order.update({
+      where: { id: orderId },
+      data: { status: "Returned" }
+    });
+
+    if (order.payments.length > 0) {
+      await tx.payment.updateMany({
+        where: { orderId: orderId },
+        data: { status: "Refunded" }
+      });
+    }
+
+    return updatedOrder;
   });
 };

@@ -82,7 +82,7 @@ User query: "${message}"`
       );
 
     // Route to correct agent
-    const stream =
+    const { intent, response } =
       await routerAgent(
         message,
         previousMessages,
@@ -99,7 +99,7 @@ User query: "${message}"`
         async start(controller) {
 
           const reader =
-            stream.body?.getReader();
+            response.body?.getReader();
 
           const decoder =
             new TextDecoder();
@@ -110,6 +110,12 @@ User query: "${message}"`
 
             return;
           }
+
+          // Prepend routing indicator
+          const indicator = `[Routed to: ${intent}] `;
+          const encoder = new TextEncoder();
+          controller.enqueue(encoder.encode(indicator));
+          fullResponse += indicator;
 
           while (true) {
 
