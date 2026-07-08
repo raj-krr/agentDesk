@@ -329,6 +329,13 @@ export default function ChatPage() {
     );
   }
 
+  const isThinking =
+    sending &&
+    (messages.length === 0 ||
+      messages[messages.length - 1].role === "user" ||
+      (messages[messages.length - 1].role === "assistant" &&
+        !messages[messages.length - 1].content));
+
   return (
     <main className="h-screen flex">
 
@@ -385,6 +392,7 @@ export default function ChatPage() {
 
         <ChatMessages
           messages={messages}
+          isThinking={isThinking}
         />
 
         <ChatInput
@@ -393,12 +401,6 @@ export default function ChatPage() {
           }
           disabled={sending}
         />
-
-        {sending && (
-          <div className="px-4 pb-2 text-sm text-zinc-500">
-            AI is thinking...
-          </div>
-        )}
 
       </section>
 
