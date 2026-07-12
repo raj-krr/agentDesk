@@ -6,6 +6,11 @@ import { billingAgent } from "./billing.agent.js";
 import { supportAgent } from "./support.agent.js";
 
 export const routerAgent = async (message: string, previousMessages: any[], conversationId: string, userId: string) : Promise<{ intent: string; response: Response }> => {
+  const cleanHistory = previousMessages.slice(-3).map((m) => ({
+    role: m.role as "user" | "assistant",
+    content: m.content.replace(/^(\[Routed to: [A-Z]+\]\s*)+/, ""),
+  }));
+
   const result = await generateText({
     model: groq("llama-3.1-8b-instant"),
 
@@ -70,7 +75,7 @@ User: "hi there"
 Answer: SUPPORT
 
 Conversation History:
-${JSON.stringify(previousMessages)}
+${JSON.stringify(cleanHistory)}
 
 Current User Message:
 "${message}"

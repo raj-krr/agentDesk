@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import { prisma } from "../db/prisma.js";
-import { getLatestOrder, createOrder, returnOrder, processPickupAndRefund } from "../services/order.service.js";
+import { getLatestOrder, createOrder, returnOrder, processPickupAndRefund, cancelOrder } from "../services/order.service.js";
 
 export const getOrders = async (c: Context) => {
   try {
@@ -157,5 +157,29 @@ export const updateOrderStatus = async (c: Context) => {
   } catch (error: any) {
     console.error("UPDATE ORDER STATUS ERROR:", error);
     return c.json({ success: false, message: error.message || "Failed to update order status" }, 500);
+  }
+};
+
+export const processOrderCancel = async (c: Context) => {
+  try {
+    const orderId = c.req.param("id");
+    const user = c.get("user");
+
+    const order = await cancelOrder(orderId, user.userId);
+
+    return c.json({
+      success: true,
+      message: "Order successfully cancelled",
+      order,
+    });
+  } catch (error: any) {
+    console.error("CANCEL ORDER ERROR:", error);
+    return c.json(
+      {
+        success: false,
+        message: error.message || "Failed to cancel order",
+      },
+      400
+    );
   }
 };

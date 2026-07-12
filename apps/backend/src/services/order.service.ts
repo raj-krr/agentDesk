@@ -105,3 +105,38 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
     return updatedOrder;
   });
 };
+
+export const cancelOrder = async (orderId: string, userId: string) => {
+  const order = await prisma.order.findUnique({
+    where: { id: orderId },
+    include: { payments: true }
+  });
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  if (order.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  if (order.status !== "Processing" && order.status !== "Pending") {
+    throw new Error("Only orders under processing or pending can be cancelled");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const updatedOrder = await tx.order.update({
+      where: { id: orderId },
+      data: { status: "Cancelled" }
+    });
+
+    if (order.payments.length > 0) {
+      await tx.payment.updateMany({
+        where: { orderId: orderId },
+        data: { status: "Refunded" }
+      });
+    }
+
+    return updatedOrder;
+  });
+};

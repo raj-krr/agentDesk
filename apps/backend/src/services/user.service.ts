@@ -70,7 +70,6 @@ export const getUserDetails = async (
         orderBy: {
           createdAt: "desc",
         },
-        take: 5,
         select: {
           id: true,
           productName: true,
@@ -94,7 +93,6 @@ export const getUserDetails = async (
         orderBy: {
           createdAt: "desc",
         },
-        take: 5,
         select: {
           id: true,
           amount: true,

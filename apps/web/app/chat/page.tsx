@@ -393,6 +393,7 @@ export default function ChatPage() {
         <ChatMessages
           messages={messages}
           isThinking={isThinking}
+          onRefreshUser={refreshUser}
         />
 
         <ChatInput

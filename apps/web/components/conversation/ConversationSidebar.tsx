@@ -23,6 +23,10 @@ export default function ConversationSidebar({
 }: Props) {
   const [activeTab, setActiveTab] = useState<"chats" | "account">("chats");
   const [returningId, setReturningId] = useState<string | null>(null);
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+  const [orderPage, setOrderPage] = useState(1);
+  const [paymentPage, setPaymentPage] = useState(1);
+  const ITEMS_PER_PAGE = 5;
 
   const handleReturnOrder = async (orderId: string) => {
     if (!confirm("Are you sure you want to return this order?")) return;
@@ -46,6 +50,38 @@ export default function ConversationSidebar({
       setReturningId(null);
     }
   };
+
+  const handleCancelOrder = async (orderId: string) => {
+    if (!confirm("Are you sure you want to cancel this order?")) return;
+    setCancellingId(orderId);
+    try {
+      const response = await fetch(`${API.ORDERS}/${orderId}/cancel`, {
+        method: "POST",
+        headers: getAuthHeaders(),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert("Order successfully cancelled. Your refund has been processed.");
+        onRefreshUser?.();
+      } else {
+        alert(data.message || "Failed to cancel order");
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      alert("An error occurred while cancelling the order.");
+    } finally {
+      setCancellingId(null);
+    }
+  };
+
+  // Pagination helper data
+  const totalOrders = user?.orders?.length || 0;
+  const totalOrderPages = Math.ceil(totalOrders / ITEMS_PER_PAGE) || 1;
+  const paginatedOrders = user?.orders?.slice((orderPage - 1) * ITEMS_PER_PAGE, orderPage * ITEMS_PER_PAGE) || [];
+
+  const totalPayments = user?.payments?.length || 0;
+  const totalPaymentPages = Math.ceil(totalPayments / ITEMS_PER_PAGE) || 1;
+  const paginatedPayments = user?.payments?.slice((paymentPage - 1) * ITEMS_PER_PAGE, paymentPage * ITEMS_PER_PAGE) || [];
 
   return (
     <aside className="w-80 border-r flex flex-col h-full bg-zinc-50">
@@ -118,9 +154,9 @@ export default function ConversationSidebar({
             {/* Orders Section */}
             <div className="space-y-2">
               <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-500 px-1">📦 My Orders</h4>
-              {user?.orders && user.orders.length > 0 ? (
+              {paginatedOrders.length > 0 ? (
                 <div className="space-y-2">
-                  {user.orders.map((order: any) => (
+                  {paginatedOrders.map((order: any) => (
                     <div key={order.id} className="bg-white border rounded-xl p-3 shadow-sm text-xs space-y-2">
                       <div className="flex justify-between items-start">
                         <span className="font-semibold text-zinc-800">{order.productName}</span>
@@ -160,36 +196,52 @@ export default function ConversationSidebar({
                         const expiryDate = new Date(deliveryDate.getTime() + 7 * 24 * 60 * 60 * 1000);
                         const isEligible = Date.now() <= expiryDate.getTime();
 
+                        if (!isEligible) return null;
+
                         return (
                           <div className="mt-2 pt-2 border-t border-zinc-100 space-y-1.5">
                             <div className="flex justify-between items-center text-[10px] text-zinc-500">
                               <span>Return Window:</span>
-                              <span className={isEligible ? "text-emerald-600 font-semibold" : "text-zinc-400"}>
-                                {isEligible 
-                                  ? `Eligible (expires ${expiryDate.toLocaleDateString()})` 
-                                  : `Expired on ${expiryDate.toLocaleDateString()}`
-                                }
+                              <span className="text-emerald-600 font-semibold">
+                                Eligible (expires {expiryDate.toLocaleDateString()})
                               </span>
                             </div>
-                            {isEligible && (
-                              <button
-                                onClick={() => handleReturnOrder(order.id)}
-                                disabled={returningId === order.id}
-                                className="w-full bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg py-1.5 text-[10px] font-bold transition disabled:opacity-50 flex items-center justify-center gap-1"
-                              >
-                                {returningId === order.id ? (
-                                  <>
-                                    <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                                    Processing...
-                                  </>
-                                ) : (
-                                  "Return Item"
-                                )}
-                              </button>
-                            )}
+                            <button
+                              onClick={() => handleReturnOrder(order.id)}
+                              disabled={returningId === order.id}
+                              className="w-full bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg py-1.5 text-[10px] font-bold transition disabled:opacity-50 flex items-center justify-center gap-1"
+                            >
+                              {returningId === order.id ? (
+                                <>
+                                  <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                  Processing...
+                                </>
+                              ) : (
+                                "Return Item"
+                              )}
+                            </button>
                           </div>
                         );
                       })()}
+
+                      {(order.status === "Processing" || order.status === "Pending") && (
+                        <div className="mt-2 pt-2 border-t border-zinc-100 space-y-1.5">
+                          <button
+                            onClick={() => handleCancelOrder(order.id)}
+                            disabled={cancellingId === order.id}
+                            className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg py-1.5 text-[10px] font-bold transition disabled:opacity-50 flex items-center justify-center gap-1 shadow-sm"
+                          >
+                            {cancellingId === order.id ? (
+                              <>
+                                <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                Processing...
+                              </>
+                            ) : (
+                              "Cancel Order"
+                            )}
+                          </button>
+                        </div>
+                      )}
 
                       {order.status === "Return Initiated" && order.returnInitiatedAt && (() => {
                         const initiatedDate = new Date(order.returnInitiatedAt);
@@ -231,6 +283,29 @@ export default function ConversationSidebar({
                       )}
                     </div>
                   ))}
+
+                  {/* Orders Pagination Controls */}
+                  {totalOrderPages > 1 && (
+                    <div className="flex items-center justify-between pt-2 px-1">
+                      <button
+                        onClick={() => setOrderPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={orderPage === 1}
+                        className="px-2.5 py-1 text-[10px] font-bold border rounded-lg bg-white disabled:opacity-40 hover:bg-zinc-50 transition"
+                      >
+                        ← Prev
+                      </button>
+                      <span className="text-[10px] text-zinc-500 font-medium">
+                        Page {orderPage} of {totalOrderPages}
+                      </span>
+                      <button
+                        onClick={() => setOrderPage((prev) => Math.min(prev + 1, totalOrderPages))}
+                        disabled={orderPage === totalOrderPages}
+                        className="px-2.5 py-1 text-[10px] font-bold border rounded-lg bg-white disabled:opacity-40 hover:bg-zinc-50 transition"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-xs text-zinc-400 italic px-1">No orders yet.</p>
@@ -240,9 +315,9 @@ export default function ConversationSidebar({
             {/* Payments Section */}
             <div className="space-y-2">
               <h4 className="font-bold text-xs uppercase tracking-wider text-zinc-500 px-1">💳 My Payments</h4>
-              {user?.payments && user.payments.length > 0 ? (
+              {paginatedPayments.length > 0 ? (
                 <div className="space-y-2">
-                  {user.payments.map((payment: any) => (
+                  {paginatedPayments.map((payment: any) => (
                     <div key={payment.id} className="bg-white border rounded-xl p-3 shadow-sm text-xs space-y-2.5">
                       <div className="flex justify-between items-center">
                         <span className="font-bold text-zinc-800">${payment.amount !== undefined && payment.amount !== null ? payment.amount.toFixed(2) : "0.00"}</span>
@@ -279,6 +354,29 @@ export default function ConversationSidebar({
                       )}
                     </div>
                   ))}
+
+                  {/* Payments Pagination Controls */}
+                  {totalPaymentPages > 1 && (
+                    <div className="flex items-center justify-between pt-2 px-1">
+                      <button
+                        onClick={() => setPaymentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={paymentPage === 1}
+                        className="px-2.5 py-1 text-[10px] font-bold border rounded-lg bg-white disabled:opacity-40 hover:bg-zinc-50 transition"
+                      >
+                        ← Prev
+                      </button>
+                      <span className="text-[10px] text-zinc-500 font-medium">
+                        Page {paymentPage} of {totalPaymentPages}
+                      </span>
+                      <button
+                        onClick={() => setPaymentPage((prev) => Math.min(prev + 1, totalPaymentPages))}
+                        disabled={paymentPage === totalPaymentPages}
+                        className="px-2.5 py-1 text-[10px] font-bold border rounded-lg bg-white disabled:opacity-40 hover:bg-zinc-50 transition"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-xs text-zinc-400 italic px-1">No payments yet.</p>

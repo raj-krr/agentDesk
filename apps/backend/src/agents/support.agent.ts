@@ -12,21 +12,20 @@ export const supportAgent = async (
 
   const userContext = user
     ? {
-        id: user.id,
         name: user.name,
         email: user.email,
-        totalConversations:
-          user.conversations.length,
-        totalOrders:
-          user.orders.length,
-        totalPayments:
-          user.payments.length,
-        recentOrders: user.orders.slice(0, 5),
-        recentPayments: user.payments.slice(0, 5),
-        recentConversations:
-          user.conversations.slice(0, 5),
+        totalConversations: user.conversations.length,
+        totalOrders: user.orders.length,
+        totalPayments: user.payments.length,
+        recentOrders: user.orders.slice(0, 5).map(o => ({ productName: o.productName, status: o.status })),
+        recentPayments: user.payments.slice(0, 5).map(p => ({ amount: p.amount, status: p.status })),
       }
     : null;
+
+  const cleanHistory = previousMessages.slice(-5).map((m) => ({
+    role: m.role as "user" | "assistant",
+    content: m.content.replace(/^(\[Routed to: [A-Z]+\]\s*)+/, ""),
+  }));
 
   const result = streamText({
     model: groq("llama-3.1-8b-instant"),
@@ -48,7 +47,7 @@ User Details:
 ${JSON.stringify(userContext, null, 2)}
 
 Conversation History:
-${JSON.stringify(previousMessages)}
+${JSON.stringify(cleanHistory)}
 
 User's Message:
 "${message}"

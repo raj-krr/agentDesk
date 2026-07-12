@@ -12,13 +12,21 @@ export const billingAgent = async (
 
   const billingContext = user
     ? {
-        id: user.id,
         name: user.name,
         email: user.email,
-        totalPayments: user.payments.length,
-        recentPayments: user.payments.slice(0, 5),
+        payments: user.payments.map((p) => ({
+          amount: p.amount,
+          status: p.status,
+          createdAt: p.createdAt,
+          productName: p.order?.productName,
+        })),
       }
     : null;
+
+  const cleanHistory = previousMessages.slice(-5).map((m) => ({
+    role: m.role as "user" | "assistant",
+    content: m.content.replace(/^(\[Routed to: [A-Z]+\]\s*)+/, ""),
+  }));
 
   const result = streamText({
     model: groq("llama-3.1-8b-instant"),
@@ -39,7 +47,7 @@ Billing Context:
 ${JSON.stringify(billingContext, null, 2)}
 
 Conversation History:
-${JSON.stringify(previousMessages)}
+${JSON.stringify(cleanHistory)}
 
 User's Message:
 "${message}"
