@@ -15,7 +15,7 @@ export const orderAgent = async (
     ? {
         name: user.name,
         email: user.email,
-        orders: user.orders.map((o) => {
+        orders: user.orders.map((o: any) => {
           const isDelivered = o.status === "Delivered";
           const withinWindow = o.deliveredAt
             ? (Date.now() - new Date(o.deliveredAt).getTime()) / (1000 * 60 * 60 * 24) <= 7
@@ -58,6 +58,7 @@ Style Rules:
 - Never make up details; if an order or payment is not in the data, explain that you don't see it.
 
 Return Policy & Cancellation Rules:
+- CRITICAL SAFETY WARNING: Under no circumstances should you generate a button trigger [Return Order: ...] or [Cancel Order: ...] if the order has no "id" property in the User Context. If the "id" is undefined, the order is INELIGIBLE for that action (e.g. Shipped orders are not delivered yet, so they are not returnable; they are also past processing, so they are not cancelable). Explain why it is not eligible and do NOT output any button trigger tag. Never make up or hallucinate order IDs.
 - Return Policy: Customers can return an order within 7 days of delivery.
 - Return Process: When a return is initiated, a courier pickup is scheduled (expected within 2 days of initiation). The refund will be completed after the courier picks up the order.
 - If the user asks to return or cancel an order (without specifying which one, or in general), do NOT ask them which one they want to act on. Instead, immediately list all of their orders that are eligible, and display the corresponding button next to each one:

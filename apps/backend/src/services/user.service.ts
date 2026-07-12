@@ -1,5 +1,6 @@
 import * as bcrypt from "bcrypt";
 import { prisma } from "../db/prisma.js";
+import { cacheGet, cacheSet } from "../lib/redis.js";
 
 export const getUserProfile = async (
   userId: string
@@ -43,7 +44,18 @@ export const getUserSupportContext = async (
 export const getUserDetails = async (
   userId: string
 ) => {
-  return prisma.user.findUnique({
+  const cacheKey = `user:${userId}`;
+  try {
+    const cachedData = await cacheGet(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+  } catch (err) {
+    console.error("Cache get error:", err);
+  }
+
+  console.log(`[Redis Cache Miss] Querying DB for User ID: ${userId}`);
+  const user = await prisma.user.findUnique({
     where: {
       id: userId,
     },
@@ -118,6 +130,16 @@ export const getUserDetails = async (
       },
     },
   });
+
+  if (user) {
+    try {
+      await cacheSet(cacheKey, user, 300);
+    } catch (err) {
+      console.error("Cache set error:", err);
+    }
+  }
+
+  return user;
 };
 
 export const getAllUsers = async () => {

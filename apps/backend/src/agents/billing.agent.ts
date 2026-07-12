@@ -14,7 +14,7 @@ export const billingAgent = async (
     ? {
         name: user.name,
         email: user.email,
-        payments: user.payments.map((p) => ({
+        payments: user.payments.map((p: any) => ({
           amount: p.amount,
           status: p.status,
           createdAt: p.createdAt,

@@ -112,15 +112,23 @@ export default function ChatMessages({ messages, isThinking, onRefreshUser }: Pr
       const orderId = match[2];
       const productName = match[3];
 
-      parts.push(
-        <ActionButton
-          key={`btn-${orderId}-${action}`}
-          action={action as "Return" | "Cancel"}
-          orderId={orderId}
-          productName={productName}
-          onRefreshUser={onRefreshUser}
-        />
-      );
+      if (orderId === "undefined" || orderId === "null" || orderId.length < 10) {
+        parts.push(
+          <span key={`text-invalid-${matchIndex}`} className="text-zinc-500 italic">
+            ({action} option unavailable)
+          </span>
+        );
+      } else {
+        parts.push(
+          <ActionButton
+            key={`btn-${orderId}-${action}-${matchIndex}`}
+            action={action as "Return" | "Cancel"}
+            orderId={orderId}
+            productName={productName}
+            onRefreshUser={onRefreshUser}
+          />
+        );
+      }
 
       lastIndex = combinedRegex.lastIndex;
     }

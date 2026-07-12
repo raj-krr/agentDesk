@@ -1,4 +1,5 @@
 import { prisma } from "../db/prisma.js";
+import { cacheDel } from "../lib/redis.js";
 
 export const getLatestOrder = async (userId: string) => {
   return prisma.order.findFirst({
@@ -62,13 +63,19 @@ export const returnOrder = async (orderId: string, userId: string) => {
     throw new Error("Return window has expired (7 days)");
   }
 
-  return prisma.order.update({
+  const updated = await prisma.order.update({
     where: { id: orderId },
     data: {
       status: "Return Initiated",
       returnInitiatedAt: new Date(),
     },
   });
+  try {
+    await cacheDel(`user:${userId}`);
+  } catch (err) {
+    console.error("Cache invalidation error in returnOrder:", err);
+  }
+  return updated;
 };
 
 export const processPickupAndRefund = async (orderId: string, userId: string) => {
@@ -89,7 +96,7 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
     throw new Error("Order is not in Return Initiated state");
   }
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const updatedOrder = await tx.order.update({
       where: { id: orderId },
       data: { status: "Returned" }
@@ -104,6 +111,12 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
 
     return updatedOrder;
   });
+  try {
+    await cacheDel(`user:${userId}`);
+  } catch (err) {
+    console.error("Cache invalidation error in processPickupAndRefund:", err);
+  }
+  return result;
 };
 
 export const cancelOrder = async (orderId: string, userId: string) => {
@@ -124,7 +137,7 @@ export const cancelOrder = async (orderId: string, userId: string) => {
     throw new Error("Only orders under processing or pending can be cancelled");
   }
 
-  return prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx) => {
     const updatedOrder = await tx.order.update({
       where: { id: orderId },
       data: { status: "Cancelled" }
@@ -139,4 +152,10 @@ export const cancelOrder = async (orderId: string, userId: string) => {
 
     return updatedOrder;
   });
+  try {
+    await cacheDel(`user:${userId}`);
+  } catch (err) {
+    console.error("Cache invalidation error in cancelOrder:", err);
+  }
+  return result;
 };

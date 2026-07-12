@@ -17,8 +17,8 @@ export const supportAgent = async (
         totalConversations: user.conversations.length,
         totalOrders: user.orders.length,
         totalPayments: user.payments.length,
-        recentOrders: user.orders.slice(0, 5).map(o => ({ productName: o.productName, status: o.status })),
-        recentPayments: user.payments.slice(0, 5).map(p => ({ amount: p.amount, status: p.status })),
+        recentOrders: user.orders.slice(0, 5).map((o: any) => ({ productName: o.productName, status: o.status })),
+        recentPayments: user.payments.slice(0, 5).map((p: any) => ({ amount: p.amount, status: p.status })),
       }
     : null;
 
