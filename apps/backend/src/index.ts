@@ -26,9 +26,11 @@ app.route("/api/chat", chatRouter);
 app.route("/api/conversations", conversationRouter);
 app.route("/api/payments", paymentRouter);
 
+const port = process.env.PORT ? parseInt(process.env.PORT) : 3001;
+
 serve({
   fetch: app.fetch,
-  port: 3001,
+  port: port,
 })
 
-console.log('🚀 Backend running on http://localhost:3001')
+console.log(`🚀 Backend running on port ${port}`)
