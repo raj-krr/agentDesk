@@ -42,16 +42,19 @@ export const getUserSupportContext = async (
 };
 
 export const getUserDetails = async (
-  userId: string
+  userId: string,
+  bypassCache = false
 ) => {
   const cacheKey = `user:${userId}`;
-  try {
-    const cachedData = await cacheGet(cacheKey);
-    if (cachedData) {
-      return cachedData;
+  if (!bypassCache) {
+    try {
+      const cachedData = await cacheGet(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
+    } catch (err) {
+      console.error("Cache get error:", err);
     }
-  } catch (err) {
-    console.error("Cache get error:", err);
   }
 
   console.log(`[Redis Cache Miss] Querying DB for User ID: ${userId}`);

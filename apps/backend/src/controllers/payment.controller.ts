@@ -1,6 +1,7 @@
 import type { Context } from "hono";
 import { prisma } from "../db/prisma.js";
 import { Prisma } from "@prisma/client";
+import { getUserDetails } from "../services/user.service.js";
 
 export const createMockPayment = async (c: Context) => {
   try {
@@ -50,6 +51,12 @@ export const createMockPayment = async (c: Context) => {
 
       return { payment, invoice };
     });
+
+    try {
+      await getUserDetails(user.userId, true);
+    } catch (err) {
+      console.error("Cache update error in createMockPayment:", err);
+    }
 
     return c.json(
       {

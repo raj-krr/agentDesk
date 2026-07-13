@@ -1,5 +1,5 @@
 import { prisma } from "../db/prisma.js";
-import { cacheDel } from "../lib/redis.js";
+import { getUserDetails } from "./user.service.js";
 import { Prisma } from "@prisma/client";
 
 export const getLatestOrder = async (userId: string) => {
@@ -72,9 +72,9 @@ export const returnOrder = async (orderId: string, userId: string) => {
     },
   });
   try {
-    await cacheDel(`user:${userId}`);
+    await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache invalidation error in returnOrder:", err);
+    console.error("Cache update error in returnOrder:", err);
   }
   return updated;
 };
@@ -113,9 +113,9 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
     return updatedOrder;
   });
   try {
-    await cacheDel(`user:${userId}`);
+    await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache invalidation error in processPickupAndRefund:", err);
+    console.error("Cache update error in processPickupAndRefund:", err);
   }
   return result;
 };
@@ -154,9 +154,9 @@ export const cancelOrder = async (orderId: string, userId: string) => {
     return updatedOrder;
   });
   try {
-    await cacheDel(`user:${userId}`);
+    await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache invalidation error in cancelOrder:", err);
+    console.error("Cache update error in cancelOrder:", err);
   }
   return result;
 };

@@ -145,25 +145,81 @@ export default function ChatMessages({ messages, isThinking, onRefreshUser }: Pr
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-6">
-      {messages.map((message, index) => (
-        <div
-          key={index}
-          className={`mb-4 ${message.role === "user" ? "text-right" : ""}`}
-        >
-          <div className="inline-block border rounded-2xl px-4 py-3 text-left max-w-[85%]">
-            {renderMessageContent(message.content)}
+    <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-zinc-50/50">
+      {messages.map((message, index) => {
+        const isUser = message.role === "user";
+        let displayContent = message.content;
+        let agentBadge = null;
+
+        if (!isUser) {
+          const match = /^\[Routed to:\s*([^\]]+)\]\s*/.exec(displayContent);
+          if (match) {
+            const agentName = match[1];
+            displayContent = displayContent.substring(match[0].length);
+
+            let badgeStyle = "";
+            let badgeIcon = "🤖";
+
+            const normalizedAgent = agentName.toLowerCase();
+            if (normalizedAgent.includes("order")) {
+              badgeStyle = "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100/50";
+              badgeIcon = "📦";
+            } else if (normalizedAgent.includes("billing")) {
+              badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100/50";
+              badgeIcon = "💳";
+            } else if (normalizedAgent.includes("support") || normalizedAgent.includes("general")) {
+              badgeStyle = "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100/50";
+              badgeIcon = "🛠️";
+            } else {
+              badgeStyle = "bg-zinc-100 text-zinc-700 border-zinc-200 hover:bg-zinc-200/50";
+            }
+
+            agentBadge = (
+              <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border transition-all duration-200 shadow-sm ${badgeStyle}`}>
+                <span className="text-xs">{badgeIcon}</span>
+                <span>{agentName}</span>
+              </div>
+            );
+          } else {
+            agentBadge = (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-zinc-100 text-zinc-700 border-zinc-200 transition-all duration-200 shadow-sm">
+                <span className="text-xs">🤖</span>
+                <span>Support Assistant</span>
+              </div>
+            );
+          }
+        }
+
+        return (
+          <div
+            key={index}
+            className={`flex flex-col ${isUser ? "items-end" : "items-start"} space-y-1.5`}
+          >
+            {!isUser && agentBadge}
+            <div
+              className={`max-w-[75%] rounded-2xl px-5 py-3.5 shadow-sm transition-all duration-300 border ${
+                isUser
+                  ? "bg-purple-600 border-purple-600 text-white hover:bg-purple-700 hover:shadow-md"
+                  : "bg-white border-zinc-200 text-zinc-800 hover:shadow-md"
+              }`}
+            >
+              {renderMessageContent(displayContent)}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {isThinking && (
-        <div className="mb-4">
-          <div className="inline-block border rounded-2xl px-4 py-3.5 bg-zinc-50/50">
+        <div className="flex flex-col items-start space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold border bg-purple-50 text-purple-700 border-purple-200 animate-pulse">
+            <span className="text-xs">🧠</span>
+            <span>Routing query...</span>
+          </div>
+          <div className="inline-block border border-zinc-200 rounded-2xl px-5 py-4 bg-white shadow-sm">
             <div className="dot-wave">
-              <span className="dot-wave-dot"></span>
-              <span className="dot-wave-dot"></span>
-              <span className="dot-wave-dot"></span>
+              <span className="dot-wave-dot bg-purple-500"></span>
+              <span className="dot-wave-dot bg-purple-500"></span>
+              <span className="dot-wave-dot bg-purple-500"></span>
             </div>
           </div>
         </div>

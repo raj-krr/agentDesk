@@ -1,7 +1,7 @@
 import type { Context } from "hono";
 import { prisma } from "../db/prisma.js";
 import { getLatestOrder, createOrder, returnOrder, processPickupAndRefund, cancelOrder } from "../services/order.service.js";
-import { cacheDel } from "../lib/redis.js";
+import { getUserDetails } from "../services/user.service.js";
 
 export const getOrders = async (c: Context) => {
   try {
@@ -49,9 +49,9 @@ export const createMockOrder = async (c: Context) => {
     );
 
     try {
-      await cacheDel(`user:${user.userId}`);
+      await getUserDetails(user.userId, true);
     } catch (err) {
-      console.error("Cache invalidation error in createMockOrder:", err);
+      console.error("Cache update error in createMockOrder:", err);
     }
 
     return c.json(
@@ -157,9 +157,9 @@ export const updateOrderStatus = async (c: Context) => {
     });
 
     try {
-      await cacheDel(`user:${user.userId}`);
+      await getUserDetails(user.userId, true);
     } catch (err) {
-      console.error("Cache invalidation error in updateOrderStatus:", err);
+      console.error("Cache update error in updateOrderStatus:", err);
     }
 
     return c.json({
