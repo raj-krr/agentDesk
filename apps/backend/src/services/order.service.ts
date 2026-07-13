@@ -1,5 +1,6 @@
 import { prisma } from "../db/prisma.js";
 import { cacheDel } from "../lib/redis.js";
+import { Prisma } from "@prisma/client";
 
 export const getLatestOrder = async (userId: string) => {
   return prisma.order.findFirst({
@@ -96,7 +97,7 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
     throw new Error("Order is not in Return Initiated state");
   }
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updatedOrder = await tx.order.update({
       where: { id: orderId },
       data: { status: "Returned" }
@@ -137,7 +138,7 @@ export const cancelOrder = async (orderId: string, userId: string) => {
     throw new Error("Only orders under processing or pending can be cancelled");
   }
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updatedOrder = await tx.order.update({
       where: { id: orderId },
       data: { status: "Cancelled" }

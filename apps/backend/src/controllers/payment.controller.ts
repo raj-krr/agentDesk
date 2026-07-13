@@ -1,5 +1,6 @@
 import type { Context } from "hono";
 import { prisma } from "../db/prisma.js";
+import { Prisma } from "@prisma/client";
 
 export const createMockPayment = async (c: Context) => {
   try {
@@ -29,7 +30,7 @@ export const createMockPayment = async (c: Context) => {
     }
 
     // Run in a transaction to create both the Payment and its Invoice
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const payment = await tx.payment.create({
         data: {
           userId: user.userId,
