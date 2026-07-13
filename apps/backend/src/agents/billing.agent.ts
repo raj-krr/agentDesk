@@ -19,6 +19,7 @@ export const billingAgent = async (
           status: p.status,
           createdAt: p.createdAt,
           productName: p.order?.productName,
+          orderStatus: p.order?.status,
         })),
       }
     : null;
@@ -42,6 +43,9 @@ Style Rules:
 - NEVER output internal database UUIDs (e.g. "9ca395af-eb83-4ffc-8178-481280fc7e6d" or any other long alphanumeric identifiers). Under no circumstances should these be shown. Instead, refer to payments or orders by their names/details (e.g., "payment for your belt order").
 - Structure your response using clean, formatted bullet points when listing multiple items to make it easy to read. Do NOT list items in a single flat paragraph.
 - Never make up details; if an order or payment is not in the data, explain that you don't see it.
+- Refund Policy: 
+  * If an order's status is "Cancelled", the refund has been processed (the payment status is "Refunded").
+  * If an order's status is "Return Initiated", the return is underway but the refund is not processed yet (the payment status is still "Succeeded"). Explain that the refund will be completed after the courier picks up the order. Reference the payment amount as the pending refund amount.
 
 Billing Context:
 ${JSON.stringify(billingContext, null, 2)}
