@@ -1,30 +1,5 @@
-import { Hono } from 'hono'
 import { serve } from '@hono/node-server'
-import userRouter from "./routes/user.route.js";
-import orderRouter from "./routes/order.route.js";
-import chatRouter from './routes/chat.route.js';
-import conversationRouter from './routes/conversation.route.js';
-import paymentRouter from './routes/payment.route.js';
-import { cors } from 'hono/cors';
-const app = new Hono()
-
-
-app.use("*", cors({
-  origin: "*",
-}));
-app.get('/', (c) => c.text('Backend is alive'))
-
-app.get('/api/health', (c) =>
-  c.json({
-    status: 'ok',
-    service: 'agentDesk-backend',
-  })
-)
-app.route("/api/users", userRouter);
-app.route("/api/orders", orderRouter);
-app.route("/api/chat", chatRouter); 
-app.route("/api/conversations", conversationRouter);
-app.route("/api/payments", paymentRouter);
+import { app } from './app.js';
 
 const port = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
