@@ -67,16 +67,17 @@ try {
 
 };
 
-return ( <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4"> <div className="w-full max-w-md"> <form
-       onSubmit={handleSubmit}
-       className="bg-white rounded-2xl border shadow-sm p-6 md:p-8 space-y-5"
-     > <div className="text-center"> <h1 className="text-3xl font-bold">
-Create Account </h1>
-
-        <p className="text-gray-500 mt-2">
-          Join AgentDesk
-        </p>
-      </div>
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl border shadow-sm p-6 md:p-8 space-y-5"
+        >
+          <div className="text-center">
+            <h1 className="text-3xl font-bold">Create Account</h1>
+            <p className="text-gray-500 mt-2">Join AgentDesk</p>
+          </div>
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-red-600 text-sm">

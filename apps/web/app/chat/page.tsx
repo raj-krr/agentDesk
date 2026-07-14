@@ -394,6 +394,8 @@ export default function ChatPage() {
           messages={messages}
           isThinking={isThinking}
           onRefreshUser={refreshUser}
+          user={user}
+          onSendPrompt={handleSendMessage}
         />
 
         <ChatInput

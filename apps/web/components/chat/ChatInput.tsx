@@ -13,7 +13,7 @@ export default function ChatInput({ onSend, disabled }: Props) {
   const [message, setMessage] = useState("");
 
   return (
-    <div className="border-t p-4 flex gap-3">
+    <div className="border-t border-zinc-200 p-4 flex gap-3 bg-white">
       <input
         value={message}
         onChange={(e) => setMessage(e.target.value)}
@@ -24,7 +24,7 @@ export default function ChatInput({ onSend, disabled }: Props) {
           }
         }}
         placeholder={disabled ? "Please wait for AI response..." : "Type a message..."}
-        className="flex-1 border rounded-xl px-4 py-3 disabled:opacity-50 disabled:bg-zinc-50 transition"
+        className="flex-1 border border-zinc-200 rounded-xl px-4 py-3 text-zinc-900 bg-white outline-none focus:ring-2 focus:ring-purple-500/50 transition disabled:opacity-50 disabled:bg-zinc-50"
         disabled={disabled}
       />
 
@@ -36,7 +36,7 @@ export default function ChatInput({ onSend, disabled }: Props) {
           }
         }}
         disabled={disabled || !message.trim()}
-        className="bg-black text-white px-6 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition font-medium text-sm"
+        className="bg-black text-white px-6 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition text-sm cursor-pointer shadow-sm"
       >
         Send
       </button>

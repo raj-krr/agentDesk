@@ -6,6 +6,7 @@ import {
   login,
     logout,
   getMe,
+  loginDemoUser,
 } from "../controllers/user.controller.js";
 
 import { authMiddleware }
@@ -26,9 +27,15 @@ userRouter.post(
 );
 
 userRouter.post(
+  "/demo",
+  loginDemoUser
+);
+
+userRouter.post(
   "/logout",
   logout
 );
+
 
 userRouter.get(
   "/me",

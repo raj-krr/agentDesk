@@ -57,6 +57,6 @@ app.get('/api/health', async (c) => {
 
 app.route("/api/users", userRouter);
 app.route("/api/orders", orderRouter);
-app.route("/api/chat", chatRouter); 
+app.route("/api/chat", chatRouter);
 app.route("/api/conversations", conversationRouter);
 app.route("/api/payments", paymentRouter);
