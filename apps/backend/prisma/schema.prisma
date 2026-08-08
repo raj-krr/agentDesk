@@ -89,3 +89,12 @@ model Invoice {
 
   createdAt   DateTime @default(now())
 }
+
+model KnowledgeBase {
+  id        String                    @id @default(uuid())
+  title     String
+  content   String
+  category  String                    // "Return", "Cancellation", "Shipping", "General"
+  embedding Unsupported("vector(384)")?
+  createdAt DateTime                  @default(now())
+}

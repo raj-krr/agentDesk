@@ -51,7 +51,6 @@ export const createMockOrder = async (c: Context) => {
     try {
       await getUserDetails(user.userId, true);
     } catch (err) {
-      console.error("Cache update error in createMockOrder:", err);
     }
 
     return c.json(
@@ -62,7 +61,6 @@ export const createMockOrder = async (c: Context) => {
       201
     );
   } catch (error) {
-    console.error("CREATE ORDER ERROR:", error);
     return c.json(
       {
         success: false,
@@ -86,7 +84,6 @@ export const processOrderReturn = async (c: Context) => {
       order,
     });
   } catch (error: any) {
-    console.error("RETURN ORDER ERROR:", error);
     return c.json(
       {
         success: false,
@@ -110,7 +107,6 @@ export const processOrderRefund = async (c: Context) => {
       order,
     });
   } catch (error: any) {
-    console.error("REFUND ORDER ERROR:", error);
     return c.json(
       {
         success: false,
@@ -159,7 +155,6 @@ export const updateOrderStatus = async (c: Context) => {
     try {
       await getUserDetails(user.userId, true);
     } catch (err) {
-      console.error("Cache update error in updateOrderStatus:", err);
     }
 
     return c.json({
@@ -168,7 +163,6 @@ export const updateOrderStatus = async (c: Context) => {
       order: updated
     });
   } catch (error: any) {
-    console.error("UPDATE ORDER STATUS ERROR:", error);
     return c.json({ success: false, message: error.message || "Failed to update order status" }, 500);
   }
 };
@@ -186,7 +180,6 @@ export const processOrderCancel = async (c: Context) => {
       order,
     });
   } catch (error: any) {
-    console.error("CANCEL ORDER ERROR:", error);
     return c.json(
       {
         success: false,

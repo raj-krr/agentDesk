@@ -55,7 +55,6 @@ export const createMockPayment = async (c: Context) => {
     try {
       await getUserDetails(user.userId, true);
     } catch (err) {
-      console.error("Cache update error in createMockPayment:", err);
     }
 
     return c.json(
@@ -67,7 +66,6 @@ export const createMockPayment = async (c: Context) => {
       201
     );
   } catch (error) {
-    console.error("CREATE PAYMENT ERROR:", error);
     return c.json(
       {
         success: false,

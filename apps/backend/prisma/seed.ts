@@ -26,11 +26,9 @@ async function main() {
     ],
   });
 
-  console.log("Seeded users");
 }
 
 main()
-  .catch(console.error)
   .finally(async () => {
     await prisma.$disconnect();
   });

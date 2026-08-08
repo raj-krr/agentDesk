@@ -67,7 +67,6 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded, user }: Pr
       }
       onDataSeeded?.();
     } catch (err) {
-      console.error(err);
       alert("Failed to seed data");
     } finally {
       setLoading(false);
@@ -98,7 +97,6 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded, user }: Pr
       setOrderForm({ productName: "", status: "Processing", trackingId: "", expectedDelivery: "", price: "199.99", deliveredAt: "" });
       onDataSeeded?.();
     } catch (err) {
-      console.error(err);
       alert("Failed to create order");
     } finally {
       setLoading(false);
@@ -124,7 +122,6 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded, user }: Pr
         alert(data.message || "Failed to update status");
       }
     } catch (err) {
-      console.error(err);
       alert("Error updating order status");
     } finally {
       setLoading(false);
@@ -146,7 +143,6 @@ export default function SandboxPanel({ isOpen, onClose, onDataSeeded, user }: Pr
         alert(data.message || "Failed to process refund simulation");
       }
     } catch (err) {
-      console.error(err);
       alert("Failed to simulate refund");
     } finally {
       setLoading(false);

@@ -44,7 +44,6 @@ export default function ConversationSidebar({
         alert(data.message || "Failed to return order");
       }
     } catch (error) {
-      console.error("Error returning order:", error);
       alert("An error occurred while returning the order.");
     } finally {
       setReturningId(null);
@@ -67,7 +66,6 @@ export default function ConversationSidebar({
         alert(data.message || "Failed to cancel order");
       }
     } catch (error) {
-      console.error("Error cancelling order:", error);
       alert("An error occurred while cancelling the order.");
     } finally {
       setCancellingId(null);

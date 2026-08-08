@@ -51,8 +51,6 @@ export const getMe = async (
 
   } catch (error) {
 
-    console.error(error);
-
     return c.json(
       {
         success: false,
@@ -97,7 +95,6 @@ export const register = async (c: Context) => {
       201
     );
   } catch (error) {
-    console.error("REGISTRATION ERROR:", error);
     return c.json(
       {
         success: false,
@@ -127,16 +124,12 @@ export const login = async (c: Context) => {
       );
     }
 
-    console.log("Entered password:", password);
-console.log("Stored password:", user.password);
-
     const validPassword =
       await bcrypt.compare(
         password,
         user.password
       );
 
-    console.log("Password Match:", validPassword);
     if (!validPassword) {
       return c.json(
         {
@@ -168,10 +161,6 @@ console.log("Stored password:", user.password);
       },
     });
   } catch (error) {
-      console.error(
-    "LOGIN ERROR:",
-    error
-  );
 
     return c.json(
       {
@@ -398,7 +387,6 @@ export const loginDemoUser = async (c: Context) => {
     try {
       await getUserDetails(user.id, true);
     } catch (err) {
-      console.error("Cache update error in loginDemoUser:", err);
     }
 
     return c.json({
@@ -412,7 +400,6 @@ export const loginDemoUser = async (c: Context) => {
     }, 201);
 
   } catch (error) {
-    console.error("DEMO USER LOGIN ERROR:", error);
     return c.json({
       success: false,
       message: "Failed to set up demo session",

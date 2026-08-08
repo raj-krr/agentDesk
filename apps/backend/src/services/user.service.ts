@@ -53,11 +53,9 @@ export const getUserDetails = async (
         return cachedData;
       }
     } catch (err) {
-      console.error("Cache get error:", err);
     }
   }
 
-  console.log(`[Redis Cache Miss] Querying DB for User ID: ${userId}`);
   const user = await prisma.user.findUnique({
     where: {
       id: userId,
@@ -138,7 +136,6 @@ export const getUserDetails = async (
     try {
       await cacheSet(cacheKey, user, 300);
     } catch (err) {
-      console.error("Cache set error:", err);
     }
   }
 

@@ -2,14 +2,26 @@ import { streamText } from "ai";
 
 import { groq } from "../lib/groq.js";
 import { getUserDetails } from "../services/user.service.js";
+import { searchKnowledgeBase } from "../services/knowledge.service.js";
 
 export const orderAgent = async (
   message: string,
   userId: string,
   previousMessages: any[] = []
-): Promise<Response> => {
+): Promise<{ response: Response; sources: string[] }> => {
 
   const user = await getUserDetails(userId);
+
+  const formatDate = (dateStr?: string | Date | null) => {
+    if (!dateStr) return undefined;
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return String(dateStr);
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    } catch (_) {
+      return String(dateStr);
+    }
+  };
 
   const context = user
     ? {
@@ -22,17 +34,18 @@ export const orderAgent = async (
             : false;
           const isEligibleReturn = isDelivered && withinWindow;
           const isEligibleCancel = o.status === "Processing" || o.status === "Pending";
-          const showId = isEligibleReturn || isEligibleCancel;
+          const price = o.payments && o.payments.length > 0 ? `$${o.payments[0].amount.toFixed(2)}` : "N/A";
 
           return {
-            id: o.id,
+            id: o.id, // Internal UUID - reserved strictly for button triggers [Return Order: ORDER_UUID for PRODUCT_NAME]
             productName: o.productName,
+            price,
             status: o.status,
             trackingId: o.trackingId,
             expectedDelivery: o.expectedDelivery,
-            deliveredAt: o.deliveredAt,
-            returnInitiatedAt: o.returnInitiatedAt,
-            createdAt: o.createdAt,
+            deliveredDate: formatDate(o.deliveredAt),
+            returnInitiatedDate: formatDate(o.returnInitiatedAt),
+            orderDate: formatDate(o.createdAt),
             isEligibleReturn,
             isEligibleCancel,
           };
@@ -40,49 +53,84 @@ export const orderAgent = async (
       }
     : null;
 
-  console.log("=== DEBUG ORDER AGENT USER CONTEXT ===");
-  console.log(JSON.stringify(context, null, 2));
-  console.log("======================================");
-
-  const cleanHistory = previousMessages.slice(-5).map((m) => ({
+  const cleanHistory = previousMessages.slice(-6).map((m) => ({
     role: m.role as "user" | "assistant",
-    content: m.content.replace(/^(\[Routed to: [A-Z]+\]\s*)+/, ""),
+    content: m.content
+      .replace(/^(\[Routed to: [A-Z]+\]\s*)+/, "")
+      .replace(/\[RAG Sources:\s*[^\]]+\]/g, "")
+      .replace(/\s*\(#ORD-[A-Z0-9]+\)/g, "")
+      .replace(/\s*\(Return option unavailable\)/gi, "")
+      .replace(/\s*\(Cancel option unavailable\)/gi, "")
+      .trim(),
   }));
 
-  const result = streamText({
-    model: groq("llama-3.1-8b-instant"),
+  // Pre-fetch relevant policies from knowledge base (RAG)
+  let policyContext = "";
+  let sources: string[] = [];
+  try {
+    const results = await searchKnowledgeBase(message, 3, 1.2);
+    if (results.length > 0) {
+      sources = Array.from(new Set(results.map((r: any) => r.title)));
+      policyContext = `
+Relevant Company Policies (from knowledge base):
+${results.map((r: any, i: number) => `
+--- Policy ${i + 1}: ${r.title} (${r.category}) ---
+${r.content}
+`).join("")}
+`;
+    }
+  } catch (err) {
+  }
 
-    prompt: `
-You are a concise and direct Order Support Assistant.
+  const systemPrompt = `
+You are a professional, direct, and helpful Order Support Specialist for AgentDesk.
 
-Style Rules:
-- Keep your response short, direct, and concise. Avoid unnecessary conversational fluff.
-- If the user sends a simple greeting (e.g., "hello", "hi"), respond with a brief greeting and ask how you can help.
-- Refer back to previous messages in the conversation history if the user uses pronouns (like "that", "it").
-- Use the 'createdAt' timestamp of the orders to identify the most recent (newest) order.
-- CRITICAL SECURITY CONSTRAINT: Under no circumstances should you write, list, or print a raw database UUID (e.g., "8c0fa209-8ce6-...") inside any visible text, bullet points, names, or descriptions. The ONLY place you are allowed to output a UUID is inside the button trigger bracket tags (e.g., [Cancel Order: ORDER_UUID for PRODUCT_NAME]). Never write UUIDs outside the brackets.
-- Structure your response using clean, formatted bullet points when listing items. Do NOT list items in a single flat paragraph.
-- Never make up details; if an order is not in the data, explain that you don't see it.
+Strict Output Rules:
+- Speak naturally and professionally as a customer support agent.
+- Always refer to products strictly by their clean Product Name. NEVER write internal codes like "#ORD-44565B85" or raw IDs in sentence text.
+- NEVER write developer placeholders like "(Cancel option unavailable)" or "(Return option unavailable)".
+- MANDATORY RULE: Whenever an item is eligible for cancellation (isEligibleCancel: true) or return (isEligibleReturn: true), you MUST append its exact bracket action button tag immediately next to the item name!
 
-Return & Cancellation Button Rules:
-- For any order in the User Context, look at "isEligibleReturn" and "isEligibleCancel" flags to determine eligibility.
-- Under no circumstances should you generate a button trigger [Return Order: ...] or [Cancel Order: ...] if the corresponding "isEligibleReturn" or "isEligibleCancel" is false. If they are false, the order is INELIGIBLE. Explain why it is not eligible and do NOT output any button trigger.
-- When listing eligible orders:
-  - If "isEligibleReturn" is true, output the button trigger: \`[Return Order: ORDER_UUID for PRODUCT_NAME]\` (replace ORDER_UUID and PRODUCT_NAME with actual values from the order).
-  - If "isEligibleCancel" is true, output the button trigger: \`[Cancel Order: ORDER_UUID for PRODUCT_NAME]\` (replace ORDER_UUID and PRODUCT_NAME with actual values from the order).
-- If the user asks to return or cancel orders, list ONLY the eligible ones along with their buttons. If none of the user's orders are eligible, explain politely: "None of your orders are currently eligible for return or cancellation."
-- If the user asks about an order already in "Return Initiated" status, mention that the return has been initiated, pickup is scheduled 2 days after returnInitiatedAt, and refund will complete after pickup. Do NOT output a return button for it.
+Interactive Action Button Tag Syntax:
+- For cancellation: \`[Cancel Order: id for Product Name]\`
+- For return: \`[Return Order: id for Product Name]\`
+- Copy the exact "id" from User Context. Never generate action buttons for ineligible, cancelled, or returned orders.
+
+FEW-SHOT EXAMPLES OF REQUIRED OUTPUT FORMAT:
+
+Example 1 (User asks "which items I can cancel"):
+Eligible for Cancellation:
+• item3 [Cancel Order: 44565b85-eb83-4ffc-8178-481280fc7e6d for item3]
+
+Not Eligible for Cancellation:
+• iPhone 15 Pro Max (already cancelled)
+• Sony WH-1000XM5 (already shipped)
+
+Example 2 (User asks "which items I can return"):
+Eligible for Return:
+• AirPods Max [Return Order: 9ca395af-eb83-4ffc-8178-481280fc7e6d for AirPods Max]
+
+Not Eligible for Return:
+• Sony WH-1000XM5 (Return initiated — courier pickup scheduled within 2 business days)
+• notebook (7-day return window expired)
+
+${policyContext}
 
 User Context:
 ${JSON.stringify(context, null, 2)}
+`;
 
-Conversation History:
-${JSON.stringify(cleanHistory)}
-
-User's Message:
-"${message}"
-`,
+  const result = streamText({
+    model: groq("llama-3.1-8b-instant"),
+    system: systemPrompt,
+    messages: [
+      ...cleanHistory,
+      { role: "user", content: message }
+    ],
   });
 
-  return result.toTextStreamResponse();
+  return {
+    response: result.toTextStreamResponse(),
+    sources,
+  };
 };

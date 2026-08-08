@@ -6,12 +6,14 @@
     "build": "prisma generate && tsc",
     "start": "node dist/index.js",
     "db:push": "prisma db push",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "test-kb": "tsx src/test-kb.ts"
   },
   "dependencies": {
     "@ai-sdk/groq": "^3.0.39",
     "@ai-sdk/xai": "^3.0.92",
     "@hono/node-server": "^1.19.9",
+    "@huggingface/transformers": "^3.0.0",
     "@prisma/client": "5",
     "@upstash/redis": "^1.34.3",
     "ai": "^6.0.191",
@@ -19,6 +21,7 @@
     "cookie-parser": "^1.4.7",
     "hono": "^4.11.9",
     "jsonwebtoken": "^9.0.3",
+    "onnxruntime-node": "1.19.0",
     "prisma": "5",
     "zod": "^4.4.3"
   },

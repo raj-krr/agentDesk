@@ -58,7 +58,7 @@ export const sendMessage = async (
     if (conversation.title === "New Conversation") {
       try {
         const titleResult = await generateText({
-          model: groq("llama-3.1-8b-instant"),
+          model: groq("llama-3.3-70b-versatile"),
           prompt: `Generate a very short, concise, and clean summary of the following user query to be used as a chat conversation title.
 Max 3-5 words. Do NOT wrap in quotes. Do NOT add a period. Do NOT include words like "Query:", "Title:", "Summary:", or "Conversation:".
 User query: "${message}"`
@@ -71,7 +71,6 @@ User query: "${message}"`
           data: { title: generatedTitle },
         });
       } catch (err) {
-        console.error("Failed to generate AI conversation title:", err);
       }
     }
 
@@ -82,7 +81,7 @@ User query: "${message}"`
       );
 
     // Route to correct agent
-    const { intent, response } =
+    const { intent, response, sources } =
       await routerAgent(
         message,
         previousMessages,
@@ -117,37 +116,48 @@ User query: "${message}"`
           controller.enqueue(encoder.encode(indicator));
           fullResponse += indicator;
 
-          while (true) {
+          try {
+            while (true) {
+              const {
+                done,
+                value,
+              } =
+                await reader.read();
 
-            const {
-              done,
-              value,
-            } =
-              await reader.read();
+              if (done) break;
 
-            if (done) break;
+              const chunk =
+                decoder.decode(
+                  value
+                );
 
-            const chunk =
-              decoder.decode(
+              fullResponse +=
+                chunk;
+
+              controller.enqueue(
                 value
               );
+            }
 
-            fullResponse +=
-              chunk;
+            // Fallback if stream was empty (e.g., LLM exhausted steps on tool calls)
+            const textOnly = fullResponse.replace(/^\[Routed to: [A-Z]+\]\s*/, "").trim();
+            if (!textOnly) {
+              const fallback = "I'm sorry, I couldn't retrieve that information right now. Could you please try rephrasing your question?";
+              controller.enqueue(encoder.encode(fallback));
+              fullResponse += fallback;
+            }
 
-            controller.enqueue(
-              value
+            // Save AI response
+            await saveMessage(
+              conversationId,
+              "assistant",
+              fullResponse
             );
+          } catch (err: any) {
+          } finally {
+            controller.close();
           }
 
-          // Save AI response
-          await saveMessage(
-            conversationId,
-            "assistant",
-            fullResponse
-          );
-
-          controller.close();
         },
       }),
 
@@ -160,8 +170,6 @@ User query: "${message}"`
     );
 
   } catch (error) {
-
-    console.error(error);
 
     return c.json(
       {

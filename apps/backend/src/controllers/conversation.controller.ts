@@ -29,8 +29,6 @@ export const createNewConversation =
 
     } catch (error) {
 
-      console.error(error);
-
       return c.json(
         {
           success: false,
@@ -92,8 +90,6 @@ export const getConversationById =
 
     } catch (error) {
 
-      console.error(error);
-
       return c.json(
         {
           success: false,
@@ -134,8 +130,6 @@ export const getAllConversations =
       });
 
     } catch (error) {
-
-      console.error(error);
 
       return c.json(
         {
@@ -206,8 +200,6 @@ export const updateConversationTitle =
       });
 
     } catch (error) {
-
-      console.error(error);
 
       return c.json(
         {

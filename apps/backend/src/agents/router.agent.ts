@@ -5,7 +5,7 @@ import { orderAgent } from "./order.agent.js";
 import { billingAgent } from "./billing.agent.js";
 import { supportAgent } from "./support.agent.js";
 
-export const routerAgent = async (message: string, previousMessages: any[], conversationId: string, userId: string) : Promise<{ intent: string; response: Response }> => {
+export const routerAgent = async (message: string, previousMessages: any[], conversationId: string, userId: string) : Promise<{ intent: string; response: Response; sources: string[] }> => {
   const cleanHistory = previousMessages.slice(-3).map((m) => ({
     role: m.role as "user" | "assistant",
     content: m.content.replace(/^(\[Routed to: [A-Z]+\]\s*)+/, ""),
@@ -13,8 +13,7 @@ export const routerAgent = async (message: string, previousMessages: any[], conv
 
   const result = await generateText({
     model: groq("llama-3.1-8b-instant"),
-
-prompt: `
+    prompt: `
 You are an AI router for a customer support platform.
 
 Your task is to classify the user's intent into ONLY ONE category.
@@ -22,31 +21,16 @@ Your task is to classify the user's intent into ONLY ONE category.
 Categories:
 
 ORDER:
-- tracking package
-- shipping updates
-- delivery delays
-- order status
-- cancellations
-- product ordered
-- package arrival
+- requests to track, cancel, or return specific orders (e.g. "where is my package", "cancel my order", "return my phone")
+- shipping/delivery status of specific orders or order history inquiries
 
 BILLING:
-- refunds
-- invoices
-- payments
-- subscriptions
-- charges
-- pricing
-- billing issues
+- requests about specific payments, refunds, invoices, subscription changes, or prices/costs of ordered products (e.g. "what is the price of that?", "how much did AirPods Max cost?", "what is the price?", "I need a refund")
 
 SUPPORT:
-- login problems
-- technical issues
-- password reset
-- FAQs
-- account help
-- general support
-- greetings and chitchat (e.g. hello, hi, hey, good morning, thanks)
+- general policies, rules, timelines, windows, or procedures (e.g. "what is the return policy?", "what is the return window?", "standard shipping times", "refund policy rules", "cancellation guidelines")
+- login problems, technical issues, password reset, or FAQs
+- greetings and general chitchat
 
 Examples:
 
@@ -55,6 +39,12 @@ Answer: ORDER
 
 User: "Why is delivery delayed?"
 Answer: ORDER
+
+User: "What is the price of that?"
+Answer: BILLING
+
+User: "How much did my AirPods Max cost?"
+Answer: BILLING
 
 User: "I need a refund"
 Answer: BILLING
@@ -96,14 +86,14 @@ Rules:
     intent = "BILLING";
   }
 
-  let response: Response;
+  let agentResult: { response: Response; sources: string[] };
   if (intent === "ORDER") {
-    response = await orderAgent(message, userId, previousMessages);
+    agentResult = await orderAgent(message, userId, previousMessages);
   } else if (intent === "BILLING") {
-    response = await billingAgent(message, userId, previousMessages);
+    agentResult = await billingAgent(message, userId, previousMessages);
   } else {
-    response = await supportAgent(message, userId, previousMessages);
+    agentResult = await supportAgent(message, userId, previousMessages);
   }
 
-  return { intent, response };
+  return { intent, response: agentResult.response, sources: agentResult.sources };
 };

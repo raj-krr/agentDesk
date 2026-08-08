@@ -33,11 +33,31 @@ export const createOrder = async (
   });
 };
 
-export const returnOrder = async (orderId: string, userId: string) => {
-  const order = await prisma.order.findUnique({
+const findUserOrder = async (orderId: string, userId: string) => {
+  let order = await prisma.order.findUnique({
     where: { id: orderId },
     include: { payments: true }
   });
+
+  if (!order) {
+    const cleanId = orderId.replace(/^#?ORD-?/i, "").toLowerCase();
+    const userOrders = await prisma.order.findMany({
+      where: { userId },
+      include: { payments: true }
+    });
+    order = userOrders.find(
+      (o) =>
+        o.id.toLowerCase().startsWith(cleanId) ||
+        cleanId.startsWith(o.id.toLowerCase().slice(0, 8)) ||
+        o.productName.toLowerCase().includes(cleanId)
+    ) || null;
+  }
+
+  return order;
+};
+
+export const returnOrder = async (orderId: string, userId: string) => {
+  const order = await findUserOrder(orderId, userId);
 
   if (!order) {
     throw new Error("Order not found");
@@ -45,6 +65,11 @@ export const returnOrder = async (orderId: string, userId: string) => {
 
   if (order.userId !== userId) {
     throw new Error("Unauthorized");
+  }
+
+  // Idempotent: If return is already initiated or completed, return the order gracefully
+  if (order.status === "Return Initiated" || order.status === "Returned") {
+    return order;
   }
 
   if (order.status !== "Delivered") {
@@ -65,7 +90,7 @@ export const returnOrder = async (orderId: string, userId: string) => {
   }
 
   const updated = await prisma.order.update({
-    where: { id: orderId },
+    where: { id: order.id },
     data: {
       status: "Return Initiated",
       returnInitiatedAt: new Date(),
@@ -74,16 +99,12 @@ export const returnOrder = async (orderId: string, userId: string) => {
   try {
     await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache update error in returnOrder:", err);
   }
   return updated;
 };
 
 export const processPickupAndRefund = async (orderId: string, userId: string) => {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { payments: true }
-  });
+  const order = await findUserOrder(orderId, userId);
 
   if (!order) {
     throw new Error("Order not found");
@@ -99,13 +120,13 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
 
   const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updatedOrder = await tx.order.update({
-      where: { id: orderId },
+      where: { id: order.id },
       data: { status: "Returned" }
     });
 
     if (order.payments.length > 0) {
       await tx.payment.updateMany({
-        where: { orderId: orderId },
+        where: { orderId: order.id },
         data: { status: "Refunded" }
       });
     }
@@ -115,16 +136,12 @@ export const processPickupAndRefund = async (orderId: string, userId: string) =>
   try {
     await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache update error in processPickupAndRefund:", err);
   }
   return result;
 };
 
 export const cancelOrder = async (orderId: string, userId: string) => {
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-    include: { payments: true }
-  });
+  const order = await findUserOrder(orderId, userId);
 
   if (!order) {
     throw new Error("Order not found");
@@ -134,19 +151,24 @@ export const cancelOrder = async (orderId: string, userId: string) => {
     throw new Error("Unauthorized");
   }
 
+  // Idempotent: If order is already Cancelled, return it gracefully without throwing an error
+  if (order.status === "Cancelled") {
+    return order;
+  }
+
   if (order.status !== "Processing" && order.status !== "Pending") {
     throw new Error("Only orders under processing or pending can be cancelled");
   }
 
   const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const updatedOrder = await tx.order.update({
-      where: { id: orderId },
+      where: { id: order.id },
       data: { status: "Cancelled" }
     });
 
     if (order.payments.length > 0) {
       await tx.payment.updateMany({
-        where: { orderId: orderId },
+        where: { orderId: order.id },
         data: { status: "Refunded" }
       });
     }
@@ -156,7 +178,6 @@ export const cancelOrder = async (orderId: string, userId: string) => {
   try {
     await getUserDetails(userId, true);
   } catch (err) {
-    console.error("Cache update error in cancelOrder:", err);
   }
   return result;
 };

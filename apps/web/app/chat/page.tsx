@@ -114,10 +114,6 @@ export default function ChatPage() {
 
         } catch (error) {
 
-          console.error(
-            error
-          );
-
           logout();
 
         } finally {
@@ -146,7 +142,6 @@ export default function ChatPage() {
           setMessages([]);
         }
       } catch (error) {
-        console.error("Failed to load messages:", error);
         setMessages([]);
       }
     };
@@ -181,10 +176,6 @@ export default function ChatPage() {
         }
 
       } catch (error) {
-
-        console.error(
-          error
-        );
       }
     };
 
@@ -297,10 +288,6 @@ export default function ChatPage() {
 
       } catch (error) {
 
-        console.error(
-          error
-        );
-
       } finally {
 
         setSending(
@@ -316,7 +303,6 @@ export default function ChatPage() {
         setUser(userData.user);
       }
     } catch (error) {
-      console.error("Failed to refresh user profile data:", error);
     }
   };
 

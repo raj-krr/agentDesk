@@ -44,8 +44,6 @@ export default function UserPage() {
 
         } catch (error) {
 
-          console.error(error);
-
           logout();
 
         } finally {

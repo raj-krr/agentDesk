@@ -26,7 +26,6 @@ async function main() {
     ]
   });
 
-  console.log("Users added");
 }
 
 main()

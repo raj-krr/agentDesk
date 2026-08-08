@@ -41,19 +41,14 @@ export const cacheGet = async (key: string): Promise<any> => {
     try {
       const cached = await redis.get(key);
       if (cached) {
-        console.log(`[Redis Cache Hit] Key: ${key}`);
         return typeof cached === "string" ? JSON.parse(cached) : cached;
       }
     } catch (err) {
-      console.error("Redis get cache error, falling back to memory:", err);
     }
   }
 
   // Fallback to memory cache
   const cached = memoryCache.get(key);
-  if (cached) {
-    console.log(`[Memory Cache Hit] Key: ${key}`);
-  }
   return cached;
 };
 
@@ -63,7 +58,6 @@ export const cacheSet = async (key: string, data: any, ttlSeconds: number = 300)
       await redis.set(key, JSON.stringify(data), { ex: ttlSeconds });
       return;
     } catch (err) {
-      console.error("Redis set cache error, falling back to memory:", err);
     }
   }
 
@@ -77,7 +71,6 @@ export const cacheDel = async (key: string): Promise<void> => {
       await redis.del(key);
       return;
     } catch (err) {
-      console.error("Redis del cache error, falling back to memory:", err);
     }
   }
 

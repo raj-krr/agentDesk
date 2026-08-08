@@ -1,0 +1,172 @@
+[
+  {
+    "title": "Return Policy",
+    "content": "Customers can return delivered orders within 7 calendar days of the delivery date. The return window is calculated from the 'deliveredAt' timestamp. To initiate a return, the order must have a status of 'Delivered' and the current date must be within 7 days of delivery. Once a return is initiated, the order status changes to 'Return Initiated' and a courier pickup is scheduled within 2 business days. Items must be in their original packaging and unused condition. Electronics must include all original accessories. After the courier picks up the item, the refund is processed within 3-5 business days to the original payment method.",
+    "category": "Return"
+  },
+  {
+    "title": "Return Ineligibility Rules",
+    "content": "Orders are NOT eligible for return in the following cases: (1) More than 7 days have passed since delivery. (2) The order status is not 'Delivered' (e.g., orders that are 'Shipped', 'Processing', 'Cancelled', or already 'Returned' cannot be returned). (3) The item has been used, damaged by the customer, or is missing original packaging/accessories. (4) The product falls under non-returnable categories such as perishable goods, intimate apparel, or customized items. If a customer's return request is denied, they should be informed of the specific reason.",
+    "category": "Return"
+  },
+  {
+    "title": "Cancellation Policy",
+    "content": "Orders can only be cancelled if they are in 'Processing' or 'Pending' status. Once an order has been shipped (status: 'Shipped'), it cannot be cancelled — the customer must wait for delivery and then initiate a return instead. Orders that are already 'Delivered', 'Cancelled', 'Return Initiated', or 'Returned' cannot be cancelled. When an order is successfully cancelled, the payment is automatically refunded to the original payment method. The refund for cancelled orders is processed immediately and reflected within 1-2 business days.",
+    "category": "Cancellation"
+  },
+  {
+    "title": "Shipping and Delivery Information",
+    "content": "Standard shipping across India takes 3-7 business days depending on the destination state. Expedited shipping (2-3 business days) is available for major metro cities (Bengaluru, Mumbai, Delhi, Hyderabad, Chennai). All orders receive a tracking ID once shipped, which can be used to monitor delivery progress. If an order status shows 'Delayed', it means the shipment has encountered a logistics delay — the expected delivery date will be updated automatically. Customers can track their order status at any time through the chat interface.",
+    "category": "Shipping"
+  },
+  {
+    "title": "Delayed Order Policy",
+    "content": "If an order is marked as 'Delayed', it means the courier partner has reported a delay in transit. The system automatically updates the expected delivery date. Customers do not need to take any action — the order will still be delivered. If a delayed order has not arrived within 14 days past the original expected delivery date, the customer can request a full refund or a replacement. Delayed orders cannot be cancelled once shipped; they can only be returned after delivery if within the 7-day return window.",
+    "category": "Shipping"
+  },
+  {
+    "title": "Refund Processing Policy",
+    "content": "Refunds are processed under the following scenarios: (1) Order cancellation — refund is immediate, reflected in 1-2 business days. (2) Order return — refund is processed after courier pickup, reflected in 3-5 business days. (3) Failed payment retry — if a payment fails and the customer does not retry, no charge is applied. All refunds are returned to the original payment method (UPI, Net Banking, Credit/Debit Card). Partial refunds are not supported — all refunds are for the full order amount.",
+    "category": "General"
+  },
+  {
+    "title": "Payment Methods and Billing",
+    "content": "We accept all major Indian payment methods: UPI (Google Pay, PhonePe, Paytm, BHIM), Net Banking, Credit Cards, Debit Cards, and Cash on Delivery (COD) for eligible pincodes. All transactions are secured with 256-bit SSL encryption and RBI-compliant payment gateways. If a UPI/card payment fails, the customer can retry within 24 hours before the order auto-cancels.",
+    "category": "General"
+  },
+  {
+    "title": "Account Security and Password Policy",
+    "content": "User passwords must be at least 8 characters long. Passwords are stored using secure bcrypt hashing. If a user forgets their password, they can request an OTP/password reset link through the login page. For security reasons, account details and passwords are never shared over support chat.",
+    "category": "General"
+  },
+  {
+    "title": "Escalation and Human Handoff Policy",
+    "content": "If the AI support agent is unable to resolve a customer's issue, or if the customer explicitly requests to speak with a human agent, the conversation is escalated to an Indian customer support specialist. Escalation triggers include: (1) Customer dissatisfaction expressing frustration 3+ times. (2) Legal, payment dispute, or account security concerns. (3) AI inability to find relevant policy information.",
+    "category": "General"
+  },
+  {
+    "title": "Company Overview and Contact Details",
+    "content": "AgentDesk Technologies Pvt. Ltd. is a leading Indian technology and e-commerce company headquartered in Outer Ring Road, Indiranagar, Bengaluru, Karnataka 560038, India. Customer Support Contact: Email: support@agentdesk.in | Toll-Free Phone: 1800-555-DESK (+91-1800-555-3375). Operating Hours: AI Assistant is available 24/7. Human Support Specialists are available Monday through Saturday from 9:00 AM to 7:00 PM IST.",
+    "category": "Company"
+  },
+  {
+    "title": "Damaged or Wrong Item Received Policy",
+    "content": "If a customer receives a damaged, defective, or wrong item, report it within 48 hours of delivery. Photo or video unboxing evidence is required. Once verified, AgentDesk will issue a free courier reverse pickup and immediately dispatch an express replacement item at no extra cost.",
+    "category": "Support"
+  },
+  {
+    "title": "Warranty and Product Guarantee Policy",
+    "content": "All electronic products sold on AgentDesk carry a 1-Year Brand Manufacturer Warranty across India. To claim warranty service, present your tax invoice and order code at any authorized brand service center or contact AgentDesk support for door-step warranty pickup assistance.",
+    "category": "Support"
+  },
+  {
+    "title": "International Shipping and Customs Duty Policy",
+    "content": "AgentDesk ships from India to over 50 countries worldwide via courier partners (DHL, FedEx). International delivery takes 7 to 14 business days. All duties and local GST/taxes are calculated and prepaid at checkout (DDP - Delivered Duty Paid).",
+    "category": "Shipping"
+  },
+  {
+    "title": "Gift Cards, Coupons, and Promotional Discounts Policy",
+    "content": "Promo codes and discount coupons can be applied at checkout. Only one promo code can be used per order (coupons are non-stackable). AgentDesk Store Credit Gift Cards do not expire and can be combined with active sale prices.",
+    "category": "Billing"
+  },
+  {
+    "title": "Price Match and Price Adjustment Guarantee",
+    "content": "AgentDesk offers a 7-Day Price Adjustment Policy. If an item you purchased goes on sale on AgentDesk within 7 days of purchase, contact support to receive a refund of the price difference to your original payment method or store credit.",
+    "category": "Billing"
+  },
+  {
+    "title": "Privacy Policy and Data Protection",
+    "content": "AgentDesk Technologies Pvt. Ltd. complies strictly with the Indian Digital Personal Data Protection (DPDP) Act 2023 and global privacy standards. All customer data is stored securely in Indian data centers. We never sell customer data to third-party marketers.",
+    "category": "Company"
+  },
+  {
+    "title": "Bulk Orders and Corporate Wholesale Policy",
+    "content": "AgentDesk provides corporate bulk discounts for orders of 10+ units of any item. Corporate buyers receive GST invoices for Input Tax Credit (ITC) claiming. Contact corporate@agentdesk.in for wholesale quotes.",
+    "category": "Company"
+  },
+  {
+    "title": "Subscription and Recurring Order Policy",
+    "content": "Subscribe & Save offers 10% off monthly recurring deliveries. Subscriptions can be paused, rescheduled, or cancelled anytime up to 24 hours prior to the next billing date.",
+    "category": "Billing"
+  },
+  {
+    "title": "Order Modification and Address Change Policy",
+    "content": "Address modifications can be requested within 1 hour of placing the order while the status is 'Processing' or 'Pending'. Once an order is shipped, address changes must be rerouted through the courier delivery agent.",
+    "category": "Shipping"
+  },
+  {
+    "title": "Lost or Stolen Package Policy",
+    "content": "If an order is marked as delivered by the courier but is missing, contact support within 24 hours. AgentDesk will file an investigation with the courier partner and dispatch a full replacement or refund upon verification.",
+    "category": "Shipping"
+  },
+  {
+    "title": "Holiday Extended Return and Seasonal Sale Terms",
+    "content": "Orders placed during Diwali, New Year, and Great Festival sales qualify for extended return windows. Final Sale clearance items are non-returnable unless received defective.",
+    "category": "Return"
+  },
+  {
+    "title": "Tax, GST, and Invoice Inquiries",
+    "content": "All prices shown on AgentDesk are inclusive of GST (Goods and Services Tax). B2B corporate customers can enter their GSTIN during checkout to receive official GST invoices for Input Tax Credit (ITC) claims.",
+    "category": "Billing"
+  },
+  {
+    "title": "Fraud Prevention and Security Verification",
+    "content": "To prevent online fraud, high-value transactions (₹50,000+) may undergo phone OTP or email verification prior to warehouse dispatch.",
+    "category": "Company"
+  },
+  {
+    "title": "Technical Support and App Compatibility",
+    "content": "AgentDesk web and mobile apps are optimized for all Android devices, iOS, Chrome, Safari, and Firefox. For chat loading issues, clear app cache or update your web browser.",
+    "category": "Support"
+  },
+  {
+    "title": "Eco-Friendly Packaging and Recycling",
+    "content": "AgentDesk uses 100% biodegradable, plastic-free eco packaging across India and offers an e-waste recycling program with ₹500 store credit incentives.",
+    "category": "Company"
+  },
+  {
+    "title": "Company Founders, History, and Establishment",
+    "content": "AgentDesk Technologies Pvt. Ltd. is an Indian technology company established and founded in 2024 by co-founders Archita and Raj Kumar. Headquartered in Bengaluru, Karnataka, India, AgentDesk was created by Archita and Raj Kumar to revolutionize customer experience and e-commerce support across India and globally using state-of-the-art autonomous AI agents. Archita and Raj Kumar are professional co-founders, business partners, and lead software architects who share a joint vision of building world-class Indian AI software.",
+    "category": "Company"
+  },
+  {
+    "title": "Company Mission, Vision, and Core Values",
+    "content": "Founded by Archita and Raj Kumar, AgentDesk's mission is to empower Indian businesses and global customers with instantaneous, intelligent, and transparent AI customer support. Our core values are: Customer First, Integrity, Innovation, and Indian Engineering Excellence.",
+    "category": "Company"
+  },
+  {
+    "title": "Press, Media, and Investor Relations",
+    "content": "For media inquiries, press interviews with co-founders Archita and Raj Kumar, or investor relations, contact press@agentdesk.in or founders@agentdesk.in.",
+    "category": "Company"
+  },
+  {
+    "title": "EMI and No-Cost Installment Payment Policy",
+    "content": "AgentDesk offers 0% No-Cost EMI and standard EMI options on purchases over ₹3,000 across major Indian partner banks (HDFC Bank, ICICI Bank, SBI, Axis Bank, Kotak, and Bajaj Finserv). No-Cost EMI tenure options range from 3 to 12 months with zero processing fees. EMI options can be selected directly on the payment gateway page at checkout.",
+    "category": "Billing"
+  },
+  {
+    "title": "Loyalty Rewards and Referral Program Rules",
+    "content": "AgentDesk Rewards allows customers to earn 1 Reward Point for every ₹100 spent on completed orders. Accumulated points can be redeemed at checkout (100 Points = ₹50 discount). Under the AgentDesk Referral Program, share your unique referral code with friends — when a friend completes their first order, both you and your friend receive ₹200 in store credit.",
+    "category": "Billing"
+  },
+  {
+    "title": "Authenticity and Counterfeit-Free Guarantee",
+    "content": "AgentDesk guarantees 100% Genuine and Authentic products. All products are sourced directly from authorized brand manufacturers and official Indian distributors, complete with original brand serial numbers, tamper-evident seals, and full manufacturer warranty coverage. We maintain a zero-tolerance policy for counterfeit goods.",
+    "category": "General"
+  },
+  {
+    "title": "Product Care, Battery Optimization, and Maintenance Guidelines",
+    "content": "To maximize the lifespan of electronic products purchased on AgentDesk: (1) Avoid exposing devices to extreme heat or direct sunlight. (2) Charge lithium-ion batteries between 20% and 80% to preserve battery health. (3) Use original brand chargers and cable accessories. (4) Clean audio devices and screens with a soft microfiber cloth — never submerge non-waterproof items in water.",
+    "category": "Support"
+  },
+  {
+    "title": "Product Specifications, Variants, and Compatibility Rules",
+    "content": "Detailed product specifications, color variants, dimensions, and compatibility requirements are listed on each product detail page. For electronic accessories (cases, chargers, cables), ensure your device model matches the compatibility table before ordering. General rules: backorders are dispatched within 7 business days of restock.",
+    "category": "General"
+  },
+  {
+    "title": "Company Trust, Sourcing, and Scale Milestones",
+    "content": "Designed in Bengaluru, Karnataka and sourced directly from certified Indian manufacturers, AgentDesk has proudly served over 1 Million satisfied customers across India since its founding in 2024. AgentDesk holds ISO-27001 security certification and a 4.8/5 customer trust rating.",
+    "category": "Company"
+  }
+]

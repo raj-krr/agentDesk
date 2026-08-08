@@ -26,9 +26,7 @@ function ActionButton({ action, orderId, productName, onRefreshUser }: ActionBut
       ? `Are you sure you want to return your ${productName}?`
       : `Are you sure you want to cancel your ${productName} order?`;
 
-    console.log("[ActionButton Clicked]", { action, orderId, productName });
     if (!confirm(confirmationMsg)) {
-      console.log("[ActionButton Click Cancelled by User]");
       return;
     }
 
@@ -37,16 +35,13 @@ function ActionButton({ action, orderId, productName, onRefreshUser }: ActionBut
       const endpoint = action === "Return" ? "return" : "cancel";
       const url = `${API.ORDERS}/${orderId}/${endpoint}`;
       const headers = getAuthHeaders();
-      console.log("[ActionButton Fetching]", { url, headers });
 
       const response = await fetch(url, {
         method: "POST",
         headers,
       });
-      console.log("[ActionButton Response Status]", response.status);
 
       const data = await response.json();
-      console.log("[ActionButton Response Data]", data);
 
       if (data.success) {
         setCompleted(true);
@@ -60,7 +55,6 @@ function ActionButton({ action, orderId, productName, onRefreshUser }: ActionBut
         alert(data.message || `Failed to ${action.toLowerCase()} order.`);
       }
     } catch (err) {
-      console.error("[ActionButton Error]", err);
       alert(`An error occurred while trying to ${action.toLowerCase()} the order.`);
     } finally {
       setLoading(false);
@@ -222,13 +216,7 @@ export default function ChatMessages({ messages, isThinking, onRefreshUser, user
       const orderId = match[2];
       const productName = match[3];
 
-      if (orderId === "undefined" || orderId === "null" || orderId.length < 10) {
-        parts.push(
-          <span key={`text-invalid-${matchIndex}`} className="text-zinc-500 italic">
-            ({action} option unavailable)
-          </span>
-        );
-      } else {
+      if (orderId && orderId !== "undefined" && orderId !== "null" && orderId.length >= 5) {
         parts.push(
           <ActionButton
             key={`btn-${orderId}-${action}-${matchIndex}`}
@@ -346,6 +334,9 @@ export default function ChatMessages({ messages, isThinking, onRefreshUser, user
               </div>
             );
           }
+
+          // Strip any residual RAG Sources tag from display content
+          displayContent = displayContent.replace(/\[RAG Sources:\s*[^\]]+\]/g, "").trim();
         }
 
         return (
