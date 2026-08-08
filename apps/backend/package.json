@@ -21,7 +21,6 @@
     "cookie-parser": "^1.4.7",
     "hono": "^4.11.9",
     "jsonwebtoken": "^9.0.3",
-    "onnxruntime-node": "1.19.0",
     "prisma": "5",
     "zod": "^4.4.3"
   },
