@@ -16,7 +16,8 @@ export const retrievePolicyTool = tool({
         "Natural language search query describing what policy information is needed.",
       ),
   }),
-  execute: async ({ query }: { query: string }) => {
+  execute: async (input: { query: string }) => {
+    const query = input?.query || "";
     if (!query || query.trim().length === 0) {
       return {
         found: false,
@@ -45,4 +46,4 @@ export const retrievePolicyTool = tool({
       throw err;
     }
   },
-});
+} as any);
