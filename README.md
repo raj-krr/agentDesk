@@ -225,17 +225,35 @@ The frontend communicates with the backend via REST endpoints and chunked SSE st
 
 ---
 
-## 🐳 Docker Deployment & Scripts
+## 🐳 Monorepo Containerization & CI/CD Pipelines
 
-To run individual service builds:
+### 1. One-Command Docker Compose Orchestration
+
+Spin up the entire enterprise ecosystem (Postgres + pgvector, Redis, Hono Backend, and Next.js Frontend) with a single command:
 
 ```bash
-# Build all workspaces with Turborepo
-pnpm build
+# 1. Clone repository
+git clone https://github.com/raj-krr/agentDesk.git
+cd agentDesk
 
-# Run type check across monorepo
-pnpm check-types
+# 2. Copy environment template & provide your Groq API Key
+cp .env.example .env
+
+# 3. Launch full monorepo stack with Docker Compose
+docker compose up --build
 ```
+
+- 🎨 **Frontend Application**: `http://localhost:3000`
+- ⚙️ **Backend Service**: `http://localhost:3001`
+- 🐘 **PostgreSQL (pgvector)**: `localhost:5432`
+- ⚡ **Redis Cache**: `localhost:6379`
+
+### 2. GitHub Actions CI/CD Pipeline
+
+Automated checks run on every push and pull request via `.github/workflows/ci.yml`:
+- 🔍 **Prisma Schema Validation**: Verifies database constraints (`prisma validate`).
+- 🛡️ **Type Safety Auditing**: Runs non-emitting TypeScript checks (`tsc --noEmit`).
+- 🐘 **Headless Service Testing**: Launches a temporary PostgreSQL + pgvector container and verifies database migrations.
 
 ---
 
