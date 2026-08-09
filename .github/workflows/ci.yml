@@ -43,6 +43,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate Prisma Database Schemas
+        env:
+          DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/agentdesk_ci?schema=public"
         run: pnpm --filter backend exec prisma validate
 
       - name: Check Backend TypeScript Compilation
@@ -86,6 +88,9 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Enable pgvector Extension in Test Database
+        run: docker exec $(docker ps -q -f name=postgres) psql -U postgres -d agentdesk_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: Push Schema to Test Database
         env:
