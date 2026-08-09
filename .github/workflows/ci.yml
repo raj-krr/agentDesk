@@ -90,7 +90,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Enable pgvector Extension in Test Database
-        run: docker exec $(docker ps -q -f name=postgres) psql -U postgres -d agentdesk_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        run: docker run --net=host -e PGPASSWORD=postgrespassword pgvector/pgvector:pg16 psql -h 127.0.0.1 -U postgres -d agentdesk_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: Push Schema to Test Database
         env:

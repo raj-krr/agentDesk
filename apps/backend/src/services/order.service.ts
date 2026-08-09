@@ -46,7 +46,7 @@ const findUserOrder = async (orderId: string, userId: string) => {
       include: { payments: true }
     });
     order = userOrders.find(
-      (o) =>
+      (o: any) =>
         o.id.toLowerCase().startsWith(cleanId) ||
         cleanId.startsWith(o.id.toLowerCase().slice(0, 8)) ||
         o.productName.toLowerCase().includes(cleanId)
