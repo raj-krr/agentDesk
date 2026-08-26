@@ -58,7 +58,7 @@ export const sendMessage = async (
     if (conversation.title === "New Conversation") {
       try {
         const titleResult = await generateText({
-          model: groq("llama-3.3-70b-versatile"),
+          model: groq("openai/gpt-oss-120b"),
           prompt: `Generate a very short, concise, and clean summary of the following user query to be used as a chat conversation title.
 Max 3-5 words. Do NOT wrap in quotes. Do NOT add a period. Do NOT include words like "Query:", "Title:", "Summary:", or "Conversation:".
 User query: "${message}"`

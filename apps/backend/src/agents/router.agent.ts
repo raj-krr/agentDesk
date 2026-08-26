@@ -12,7 +12,7 @@ export const routerAgent = async (message: string, previousMessages: any[], conv
   }));
 
   const result = await generateText({
-    model: groq("llama-3.1-8b-instant"),
+    model: groq("openai/gpt-oss-20b"),
     prompt: `
 You are an AI router for a customer support platform.
 
